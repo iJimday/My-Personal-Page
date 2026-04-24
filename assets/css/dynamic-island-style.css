@@ -1,0 +1,21 @@
+.dynamic-island {
+	background: linear-gradient(135deg, #3a4d60 0%, #2c4a6e 100%);
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.dynamic-island-icon {
+	display: none;
+}
+
+.dynamic-island-text {
+	text-align: center;
+	width: 100%;
+}
+
+.dynamic-island-progress {
+	background: rgba(30, 144, 255, 0.3);
+}
+
+.dynamic-island-progress-bar {
+	background: #1e90ff;
+}
