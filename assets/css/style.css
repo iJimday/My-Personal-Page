@@ -518,3 +518,25 @@ body {
 	color: #f1f5f9;
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
+
+/* 手机端运行 */
+.only-mobile {
+	display: none;
+}
+
+@media (max-width: 480px) {
+	.only-mobile {
+		display: inline;
+	}
+}
+
+/* pad端运行 */
+.only-pad {
+	display: none;
+}
+
+@media (max-width: 768px) {
+	.only-pad {
+		display: inline;
+	}
+}
