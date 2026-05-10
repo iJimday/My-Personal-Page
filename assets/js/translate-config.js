@@ -24,6 +24,8 @@ translate.nomenclature.append('chinese_simplified', 'english', `
 	短链接=Link Shortener
 	豆包=Doubao
 	微微微微微微微微微微微微微微微调=Fine-tuning code
+	本站模板源自 caonb.cn 原版魔改优化，由豆包负责疯狂的微微微微微微微微微微微微微微微调，Jimday 匠心打磨设计，仅限个人玩耍使用，未经允许严禁转载、拿去商用哦🈲！=This template is modified and optimized based on the original version from caonb.cn. It has been endlessly tweaked and finely adjusted by Doubao. Exquisitely designed and polished by Jimday. For personal use only. Unauthorized reproduction and commercial use are strictly prohibited 🚫!
+	明白明白=Got it, got it.
 	网站地图=Sitemap
 `); //自定义翻译术语
 translate.ignore.text.push('中文'); //翻译时忽略指定的文字不翻译
