@@ -3,7 +3,14 @@
 
 <head>
 	<title>其他 - 阿戴主页</title>
-	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+	<script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
+	<script>
+		$(function() {
+			$(".headerpage").load("/assets/public/header.html");
+			$(".modal-box-page").load("/assets/public/modal-box.html");
+			$(".footerpage").load("/assets/public/footer.html");
+		});
+	</script>
 </head>
 
 <body>
@@ -18,8 +25,8 @@
 				</div>
 				<div class="profile-name"><i class="fa-solid fa-at"></i>Jimday</div>
 				<div class="profile-bio">
-					欲买桂花同载酒，终不似，少年游。<br>
-					【宋代】刘过《唐多令・芦叶满汀洲》
+					众里寻他千百度。蓦然回首，那人却在，灯火阑珊处。<br>
+					【宋代】辛弃疾《青玉案·元夕》
 				</div>
 			</div>
 		</div>
@@ -32,7 +39,7 @@
 			</div>
 
 			<div class="sites-grid">
-				<a href="../" rel="noopener noreferrer" class="site-card" style="animation-delay: 0s;">
+				<a href="/" rel="noopener noreferrer" class="site-card" style="animation-delay: 0s;">
 					<div class="site-card-content">
 						<div class="site-icon">我 </div>
 						<div class="site-info">
@@ -50,7 +57,7 @@
 		<!-- 底部版权栏 -->
 		<footer class="footer">
 			<div class="footer-content">
-				<p>天生我材必有用，千金散尽还复来。</p>
+				<p>想当年，金戈铁马，气吞万里如虎。</p>
 				<div class="footerpage"></div>
 			</div>
 		</footer>
@@ -66,14 +73,6 @@
 	
 	<script src="../../assets/js/main.js"></script>
 	
-	<script>
-		$(function() {
-			$(".headerpage").load("/assets/public/header.html");
-			$(".modal-box-page").load("/assets/public/modal-box.html");
-			$(".footerpage").load("/assets/public/footer.html");
-		});
-	</script>
-
 	<!--translate.zvo.cn-->
 	<script>
 		translate.execute(); //dom加载完后，进行translate.js 触发翻译的执行
