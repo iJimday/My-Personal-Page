@@ -5,50 +5,16 @@
 	<title>其他 - 阿戴主页</title>
 	<script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
 	<script>
-		$(document).ready(function() {
-		    $(document).on('click', '.search-btn', function() {
-		        const searchTerm = $(this).closest('.search-box').find('input').val().trim();
-		        if (searchTerm) {
-		            alert('搜索: ' + searchTerm);
-		        }
-		    });
-		    
-		    $(document).on('mouseenter', '.main-nav li', function() {
-		        $(this).addClass('hover');
-		    });
-		    
-		    $(document).on('mouseleave', '.main-nav li', function() {
-		        $(this).removeClass('hover');
-		    });
-		    
-		    $("#headerpage").load("/assets/public/header.html");
+		$(function() {
+			$("#headerpage").load("/assets/public/header.html");
 			$("#modal-box-page").load("/assets/public/modal-box.html");
-		    $("#footerpage").load("/assets/public/footer.html", function() {
-		        initCopyrightYear();
-		        initStickyHeader();
-		    });
-		});
-		
-		function initCopyrightYear() {
-		    $('.copyright-year').text(new Date().getFullYear());
-		}
-		
-		function initStickyHeader() {
-		    if ($('.main-header').length) {
-		        $(window).scroll(function() {
-		            if ($(window).scrollTop() > 100) {
-		                $('.main-header').addClass('sticky');
-		            } else {
-		                $('.main-header').removeClass('sticky');
-		            }
-		        });
-		    }
+			$("#footerpage").load("/assets/public/footer.html");
 		}
 	</script>
 </head>
 
 <body>
-	<div class="headerpage"></div>
+	<div id="headerpage"></div>
 	<div class="main-container">
 		<!-- 顶部个人信息区 -->
 		<div class="profile-section">
@@ -92,13 +58,13 @@
 		<footer class="footer">
 			<div class="footer-content">
 				<p>想当年，金戈铁马，气吞万里如虎。</p>
-				<div class="footerpage"></div>
+				<div id="footerpage"></div>
 			</div>
 		</footer>
 	</div>
 	
 	<!-- 弹窗结构 -->
-	<div class="modal-box-page"></div>
+	<div id="modal-box-page"></div>
 
 	<!--translate.zvo.cn-->
 	<script src="/assets/js/translate.js"></script>

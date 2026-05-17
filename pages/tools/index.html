@@ -5,45 +5,20 @@
 	<title>工具集合 - 阿戴主页</title>
 	<script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
 	<script>
-		$(document).ready(function() {
-		    $(document).on('click', '.search-btn', function() {
-		        const searchTerm = $(this).closest('.search-box').find('input').val().trim();
-		        if (searchTerm) {
-		            alert('搜索: ' + searchTerm);
-		        }
+		$(document).ready(function(){
+		    $("#headerpage").load("/assets/public/header.html", function() {
+		        console.log("头部加载完成，开始加载头部专属脚本...");
+		        $.getScript("/assets/js/main.js");
 		    });
-		    
-		    $(document).on('mouseenter', '.main-nav li', function() {
-		        $(this).addClass('hover');
+			$("#modal-box-page").load("/assets/public/modal-box.html", function() {
+		        console.log("头部加载完成，开始加载头部专属脚本...");
+		        $.getScript("/assets/js/main.js");
 		    });
-		    
-		    $(document).on('mouseleave', '.main-nav li', function() {
-		        $(this).removeClass('hover');
-		    });
-		    
-		    $("#headerpage").load("/assets/public/header.html");
-			$("#modal-box-page").load("/assets/public/modal-box.html");
 		    $("#footerpage").load("/assets/public/footer.html", function() {
-		        initCopyrightYear();
-		        initStickyHeader();
+		        console.log("尾部加载完成，开始加载尾部专属脚本...");
+		        $.getScript("/assets/js/main.js");
 		    });
 		});
-		
-		function initCopyrightYear() {
-		    $('.copyright-year').text(new Date().getFullYear());
-		}
-		
-		function initStickyHeader() {
-		    if ($('.main-header').length) {
-		        $(window).scroll(function() {
-		            if ($(window).scrollTop() > 100) {
-		                $('.main-header').addClass('sticky');
-		            } else {
-		                $('.main-header').removeClass('sticky');
-		            }
-		        });
-		    }
-		}
 	</script>
 </head>
 
