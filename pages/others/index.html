@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+	<title>其他 - 阿戴主页</title>
+	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+
+<body>
+	<div class="headerpage"></div>
+	<div class="main-container">
+		<!-- 顶部个人信息区 -->
+		<div class="profile-section">
+			<div class="profile-content">
+				<div class="avatar-wrapper" id="themeToggle">
+					<div class="avatar">戴</div>
+					<div class="avatar-tooltip">点击切换深色模式</div>
+				</div>
+				<div class="profile-name"><i class="fa-solid fa-at"></i>Jimday</div>
+				<div class="profile-bio">
+					欲买桂花同载酒，终不似，少年游。<br>
+					【宋代】刘过《唐多令・芦叶满汀洲》
+				</div>
+			</div>
+		</div>
+
+		<!-- 下方站点列表区 -->
+		<div class="sites-section">
+			<div class="sites-header">
+				<h2 class="sites-title">其他</h2>
+				<span class="sites-count">0个</span>
+			</div>
+
+			<div class="sites-grid">
+				<a href="../" rel="noopener noreferrer" class="site-card" style="animation-delay: 0s;">
+					<div class="site-card-content">
+						<div class="site-icon">我 </div>
+						<div class="site-info">
+							<div class="site-name">返回主页&nbsp;<i class="fa-solid fa-rotate-left"></i></div>
+							<div class="site-desc">返回我的个人主页</div>
+						</div>
+					</div>
+					<div class="site-card-footer">
+						<div class="site-url"><i class="fa-solid fa-arrow-up-right-from-square"></i>Jimday.cn</div>
+					</div>
+				</a>
+			</div>
+		</div>
+
+		<!-- 底部版权栏 -->
+		<footer class="footer">
+			<div class="footer-content">
+				<p>天生我材必有用，千金散尽还复来。</p>
+				<div class="footerpage"></div>
+			</div>
+		</footer>
+	</div>
+	
+	<!-- 弹窗结构 -->
+	<div class="modal-box-page"></div>
+
+	<!--translate.zvo.cn-->
+	<script src="../../assets/js/translate.js"></script>
+	<!--translate.js settings-->
+	<script src="../../assets/js/translate-config.js"></script>
+	
+	<script src="../../assets/js/main.js"></script>
+	
+	<script>
+		$(function() {
+			$(".headerpage").load("/assets/public/header.html");
+			$(".modal-box-page").load("/assets/public/modal-box.html");
+			$(".footerpage").load("/assets/public/footer.html");
+		});
+	</script>
+
+	<!--translate.zvo.cn-->
+	<script>
+		translate.execute(); //dom加载完后，进行translate.js 触发翻译的执行
+		translate.isTranslateExecute('english'); //当前是否已进行了翻译处理
+	</script>
+</body>
+</html>
