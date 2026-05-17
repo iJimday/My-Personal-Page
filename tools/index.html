@@ -1,31 +1,30 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>工具集合 - 阿戴主页</title>
+	<meta name="description" content="欲买桂花同载酒，终不似，少年游。">
+	<meta name="keywords" content="Jimday,阿戴,个人主页,域名,短链接,工具,工具集合,我的主页">
+	<meta name="author" content="Jimday">
+	<link rel="canonical" href="https://www.jimday.cn/">
+	<meta name="theme-color" content="#0088ff">
+	<link rel="icon" href="/img/favicon.ico" type="image/x-icon">
+	<link rel="apple-touch-icon" href="/img/favicon.png">
+	<meta property="og:title" content="Jimday - 阿戴主页">
+	<meta property="og:description" content="Jimday 阿戴个人主页。">
+	<meta property="og:url" content="https://www.jimday.cn/">
+	<meta property="og:type" content="website">
+	<meta property="og:site_name" content="Jimday">
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:title" content="Jimday - 阿戴主页">
+	<meta name="twitter:description" content="Jimday 阿戴个人主页。">
 	<link rel="stylesheet" type="text/css" href="/assets/css/style.css"><!--主体CSS-->
 	<link rel="stylesheet" type="text/css" href="/assets/css/all.min.css"><!--fontawesome-->
-	<script>
-		fetch('/assets/public/header.html')
-			.then(response => response.text())
-			.then(data => {
-				document.getElementById('headerpage').innerHTML = data;
-			})
-			.catch(error => {
-				console.error('加载头部失败:', error);
-			});
-		fetch('/assets/public/footer.html')
-			.then(response => response.text())
-			.then(data => {
-				document.getElementById('footerpage').innerHTML = data;
-			})
-			.catch(error => {
-				console.error('加载头部失败:', error);
-			});
-    </script>
 </head>
 
 <body>
-	<div id="headerpage"></div>
 	<div class="main-container">
 		<!-- 顶部个人信息区 -->
 		<div class="profile-section">
@@ -36,8 +35,8 @@
 				</div>
 				<div class="profile-name"><i class="fa-solid fa-at"></i>Jimday</div>
 				<div class="profile-bio">
-					欲买桂花同载酒，终不似，少年游。<br>
-					【宋代】刘过《唐多令・芦叶满汀洲》
+					众里寻他千百度。蓦然回首，那人却在，灯火阑珊处。<br>
+					【宋代】辛弃疾《青玉案·元夕》
 				</div>
 			</div>
 		</div>
@@ -46,7 +45,7 @@
 		<div class="sites-section">
 			<div class="sites-header">
 				<h2 class="sites-title">我的工具</h2>
-				<span class="sites-count">4个</span>
+				<span class="sites-count">4个 </span>
 			</div>
 
 			<div class="sites-grid">
@@ -59,7 +58,14 @@
 						</div>
 					</div>
 					<div class="site-card-footer">
-						<div class="site-url"><i class="fa-solid fa-arrow-up-right-from-square"></i>Jimday.cn</div>
+						<div class="site-url">
+							<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+								<polyline points="15 3 21 3 21 9"></polyline>
+								<line x1="10" y1="14" x2="21" y2="3"></line>
+							</svg>
+							Jimday.cn
+						</div>
 					</div>
 				</a>
 				<a href="https://check.proxyip.furls.cn" target="_blank" rel="noopener noreferrer" class="site-card" style="animation-delay: 0.1s;">
@@ -79,7 +85,7 @@
 						<div class="site-icon">链 </div>
 						<div class="site-info">
 							<div class="site-name">个人短链接系统&nbsp;<i class="fa-solid fa-link"></i></div>
-							<div class="site-desc">简洁、极速、安全的短链接工具，自带数据统计分析功能，全程基于Cloudflare运行。</div>
+							<div class="site-desc">简洁、极速、安全的短链接工具，支持数据统计分析，全程基于 Cloudflare 运行。</div>
 						</div>
 					</div>
 					<div class="site-card-footer">
@@ -91,23 +97,23 @@
 						<div class="site-icon">H5 </div>
 						<div class="site-info">
 							<div class="site-name">HTML5 转 CF Worker&nbsp;<i class="fa-solid fa-code"></i></div>
-							<div class="site-desc">HTML5 转 Cloudflare Worker，基于Cloudflare运行。</div>
+							<div class="site-desc">HTML5 转 Cloudflare Worker，基于 Cloudflare 运行。</div>
 						</div>
 					</div>
 					<div class="site-card-footer">
-						<div class="site-url"><i class="fa-solid fa-arrow-up-right-from-square"></i>i.furls.cn</div>
+						<div class="site-url"><i class="fa-solid fa-arrow-up-right-from-square"></i>h5-cfwork.furls.cn</div>
 					</div>
 				</a>
 				<a href="https://cloudflare.daijianmin.com" target="_blank" rel="noopener noreferrer" class="site-card" style="animation-delay: 0.4s;">
 					<div class="site-card-content">
 						<div class="site-icon">试 </div>
 						<div class="site-info">
-							<div class="site-name">我的CF主页&nbsp;<i class="fa-brands fa-cloudflare"></i></div>
+							<div class="site-name">我的CF测试主页&nbsp;<i class="fa-brands fa-cloudflare"></i></div>
 							<div class="site-desc">Jimday's Cloudflare Homepage！(test)</div>
 						</div>
 					</div>
 					<div class="site-card-footer">
-						<div class="site-url"><i class="fa-solid fa-arrow-up-right-from-square"></i>i.furls.cn</div>
+						<div class="site-url"><i class="fa-solid fa-arrow-up-right-from-square"></i>cf.daijianmin.com</div>
 					</div>
 				</a>
 			</div>
@@ -117,7 +123,10 @@
 		<footer class="footer">
 			<div class="footer-content">
 				<p>天生我材必有用，千金散尽还复来。</p>
-				<p><div id="footerpage"></div></p>
+				<p>&copy; <span id="year"></span> Jimday. All Rights Reserved.&nbsp;<span class="only-mobile"><br></span>
+					<a href="javascript:;" id="templateBtn" style="text-decoration: none;color: inherit;" title="豆包 &bull; 微微微微微微微微微微微微微微微调">Template</a>&nbsp;|
+					<a href="/sitemap.xml" title="Sitemap" target="_blank" rel="noopener noreferrer" style="text-decoration: none;color: inherit;">网站地图</a>
+				</p>
 			</div>
 		</footer>
 	</div>
@@ -130,18 +139,16 @@
 			<button class="modal-close" id="modalClose">明白明白</button>
 		</div>
 	</div>
-	
-	<!--translate.zvo.cn-->
+
+	<!--translate.js & settings-->
 	<script src="/assets/js/translate.js"></script>
-	<!--translate.js settings-->
 	<script src="/assets/js/translate-config.js"></script>
 	
 	<script src="/assets/js/main.js"></script>
-	
+</body>
 	<!--translate.zvo.cn-->
 	<script>
 		translate.execute(); //dom加载完后，进行translate.js 触发翻译的执行
 		translate.isTranslateExecute('english'); //当前是否已进行了翻译处理
 	</script>
-</body>
 </html>
