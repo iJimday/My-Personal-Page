@@ -2,15 +2,24 @@
 <html lang="zh-CN">
 <head>
 	<title>其他 - 阿戴主页</title>
-	<link rel="stylesheet" type="text/css" href="/assets/css/style.css"><!--主体CSS-->
-	<link rel="stylesheet" type="text/css" href="/assets/css/all.min.css"><!--fontawesome-->
-	<script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
 	<script>
-		$(function() {
-			$("#headerpage").load("/assets/public/header.html");
-			$("#footerpage").load("/assets/public/footer.html");
-		});
-	</script>
+		fetch('../../assets/public/header.html')
+			.then(response => response.text())
+			.then(data => {
+				document.getElementById('headerpage').innerHTML = data;
+			})
+			.catch(error => {
+				console.error('加载头部失败:', error);
+			});
+		fetch('../../assets/public/footer.html')
+			.then(response => response.text())
+			.then(data => {
+				document.getElementById('footerpage').innerHTML = data;
+			})
+			.catch(error => {
+				console.error('加载头部失败:', error);
+			});
+    </script>
 </head>
 
 <body>
