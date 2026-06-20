@@ -14,7 +14,7 @@ var translate = {
 	 * 格式：major.minor.patch.date
 	 */
 	// AUTO_VERSION_START
-	version: '4.0.4.20260514',
+	version: '4.1.0.20260526',
 	
 	/*js translate.config start*/
 	/*
@@ -96,6 +96,11 @@ var translate = {
 				class:[],
 				tag:[],
 				id:[],
+				// whole 行内上下文分段翻译开关。默认关闭，避免旧 translate.json 接口无法处理数组分段请求。
+				context:{
+					// 对应的数据 translate.whole.context.is_use
+					use:false
+				},
 			};
 			//鼠标划词翻译 https://translate.zvo.cn/4072.html
 			selectionTranslate = {
@@ -129,6 +134,11 @@ var translate = {
 				appendParams: {},
 				// 网络请求自定义附加参数-追加 header 请求头参数， https://translate.zvo.cn/471711.html  对应的数据 translate.request.appendHeaders
 				appendHeaders: {},
+				// translate.json 的 SSE 流式响应能力，默认关闭。开启后只影响翻译接口请求，并且会在不支持时自动降级回原 JSON 请求。
+				sse:{
+					// 对应的数据 translate.request.sse.use
+					use:false
+				},
 				// 翻译排队执行  https://translate.zvo.cn/479742.html  对应的数据 translate.waitingExecute.use
 				waitingExecute: true,
 			};
@@ -192,6 +202,7 @@ var translate = {
 			data.whole.class = translate.whole.class;
 			data.whole.tag = translate.whole.tag;
 			data.whole.id = translate.whole.id;
+			data.whole.context.use = translate.whole.context.isUse();
 			data.selectionTranslate.use = translate.selectionTranslate.use;
 			data.request.api.host = translate.request.api.host;
 			data.request.api.language = translate.request.api.language;
@@ -204,6 +215,7 @@ var translate = {
 			data.request.listener.minIntervalTime = translate.request.listener.minIntervalTime;
 			data.request.appendParams = translate.request.appendParams;
 			data.request.appendHeaders = translate.request.appendHeaders;
+			data.request.sse.use = translate.request.sse.use;
 			data.request.waitingExecute = translate.waitingExecute.use;
 			data.element.tagAttribute = translate.element.tagAttribute;
 			data.progress.api.use = translate.progress.api.use;
@@ -231,10 +243,12 @@ var translate = {
 			var listener = (typeof(data.listener) === 'object' && data.listener !== null) ? data.listener : {};
 			var ignore = (typeof(data.ignore) === 'object' && data.ignore !== null) ? data.ignore : {};
 			var whole = (typeof(data.whole) === 'object' && data.whole !== null) ? data.whole : {};
+			var wholeContext = (typeof(whole.context) === 'object' && whole.context !== null) ? whole.context : {};
 			var selectionTranslate = (typeof(data.selectionTranslate) === 'object' && data.selectionTranslate !== null) ? data.selectionTranslate : {};
 			var request = (typeof(data.request) === 'object' && data.request !== null) ? data.request : {};
 			var requestApi = (typeof(request.api) === 'object' && request.api !== null) ? request.api : {};
 			var requestListener = (typeof(request.listener) === 'object' && request.listener !== null) ? request.listener : {};
+			var requestSse = (typeof(request.sse) === 'object' && request.sse !== null) ? request.sse : {};
 			var element = (typeof(data.element) === 'object' && data.element !== null) ? data.element : {};
 			var progress = (typeof(data.progress) === 'object' && data.progress !== null) ? data.progress : {};
 			var progressApi = (typeof(progress.api) === 'object' && progress.api !== null) ? progress.api : {};
@@ -263,7 +277,7 @@ var translate = {
 			if(typeof(language.autoDiscriminateLocalLanguage) === 'boolean' && language.autoDiscriminateLocalLanguage === true){
 				translate.setAutoDiscriminateLocalLanguage();
 			}
-			if(typeof(language.range) === 'object' && language.range.length > 0){
+			if(language.range != null && typeof(language.range) === 'object' && language.range.length > 0){
 				translate.language.translateLanguagesRange = language.range;
 			}
 			if(typeof(languageUrlParamControl.use) === 'boolean'){
@@ -275,28 +289,28 @@ var translate = {
 			if(typeof(language.translateLocal) === 'boolean'){
 				translate.language.translateLocal = language.translateLocal;
 			}
-			if(typeof(data.images) === 'object'){
+			if(data.images != null && typeof(data.images) === 'object'){
 				translate.images.queues = data.images;
 			}
-			if(typeof(data.nomenclature) === 'object'){
+			if(data.nomenclature != null && typeof(data.nomenclature) === 'object'){
 				translate.nomenclature.data = data.nomenclature;
 			}
 			if(typeof(listener.use) === 'boolean'){
 				translate.listener.use = listener.use;
 			}
-			if(typeof(ignore.text) === 'object'){
+			if(ignore.text != null && typeof(ignore.text) === 'object'){
 				translate.ignore.text = ignore.text;
 			}
-			if(typeof(ignore.textRegex) === 'object'){
+			if(ignore.textRegex != null && typeof(ignore.textRegex) === 'object'){
 				translate.ignore.textRegex = ignore.textRegex;
 			}
-			if(typeof(ignore.id) === 'object'){
+			if(ignore.id != null && typeof(ignore.id) === 'object'){
 				translate.ignore.id = ignore.id;
 			}
-			if(typeof(ignore.class) === 'object'){
+			if(ignore.class != null && typeof(ignore.class) === 'object'){
 				translate.ignore.class = ignore.class;
 			}
-			if(typeof(ignore.tag) === 'object'){
+			if(ignore.tag != null && typeof(ignore.tag) === 'object'){
 				translate.ignore.tag = ignore.tag;
 			}
 			if(typeof(data.service) === 'string' && data.service.trim().length > 0){
@@ -305,21 +319,24 @@ var translate = {
 			if(typeof(whole.enableAll) === 'boolean'){
 				translate.whole.isEnableAll = whole.enableAll;
 			}
-			if(typeof(whole.class) === 'object'){
+			if(whole.class != null && typeof(whole.class) === 'object'){
 				translate.whole.class = whole.class;
 			}
-			if(typeof(whole.tag) === 'object'){
+			if(whole.tag != null && typeof(whole.tag) === 'object'){
 				translate.whole.tag = whole.tag;
 			}
-			if(typeof(whole.id) === 'object'){
+			if(whole.id != null && typeof(whole.id) === 'object'){
 				translate.whole.id = whole.id;
+			}
+			if(typeof(wholeContext.use) === 'boolean'){
+				translate.whole.context.is_use = wholeContext.use;
 			}
 			if(typeof(selectionTranslate.use) === 'boolean' && selectionTranslate.use === true){
 				if(translate.selectionTranslate.use === false){ //没有启动，才会启动
 					translate.selectionTranslate.start();
 				}
 			}
-			if(typeof(requestApi.host) === 'object'){
+			if(requestApi.host != null && typeof(requestApi.host) === 'object'){
 				translate.request.api.host = requestApi.host;
 			}
 			if(typeof(requestApi.language) === 'string'){
@@ -343,16 +360,19 @@ var translate = {
 			if(typeof(requestListener.minIntervalTime) === 'number'){
 				translate.request.listener.minIntervalTime = requestListener.minIntervalTime;
 			}
-			if(typeof(request.appendParams) === 'object'){
+			if(request.appendParams != null && typeof(request.appendParams) === 'object'){
 				translate.request.appendParams = request.appendParams;
 			}
-			if(typeof(request.appendHeaders) === 'object'){
+			if(request.appendHeaders != null && typeof(request.appendHeaders) === 'object'){
 				translate.request.appendHeaders = request.appendHeaders;
+			}
+			if(typeof(requestSse.use) === 'boolean'){
+				translate.request.sse.use = requestSse.use;
 			}
 			if(typeof(request.waitingExecute) === 'boolean'){
 				translate.waitingExecute.use = request.waitingExecute;
 			}
-			if(typeof(element.tagAttribute) === 'object'){
+			if(element.tagAttribute != null && typeof(element.tagAttribute) === 'object'){
 				translate.element.tagAttribute = element.tagAttribute;
 			}
 			if(typeof(progressApi.use) === 'boolean' && progressApi.use === true){
@@ -363,7 +383,7 @@ var translate = {
 			if(typeof(progress.style) === 'string'){
 				translate.progress.style = progress.style;
 			}
-			if(typeof(network.rules) === 'object'){
+			if(network.rules != null && typeof(network.rules) === 'object'){
 				translate.network.rules = network.rules;
 			}
 			if(typeof(network.use) === 'boolean' && network.use === true){
@@ -498,7 +518,7 @@ var translate = {
 				if(typeof(translate.selectLanguageTag.supportLanguageMap) == 'undefined'){
 					translate.selectLanguageTag.supportLanguageMap = new Map();
 					for(var si = 0; si<languageList.length; si++){
-						if(typeof(languageList[si]) != 'undefined' && typeof(languageList[si].id)){
+						if(languageList[si] != null && typeof(languageList[si].id) === 'string'){
 							translate.selectLanguageTag.supportLanguageMap.set(languageList[si].id, languageList[si]);
 						}
 					}
@@ -535,6 +555,9 @@ var translate = {
 
 
 			for(var i = 0; i<languageList.length; i++){
+				if(languageList[i] == null || typeof(languageList[i].id) !== 'string' || typeof(languageList[i].name) !== 'string'){
+					continue;
+				}
 				var option = document.createElement("option"); 
 			    option.setAttribute("value",languageList[i].id);
 
@@ -609,7 +632,7 @@ var translate = {
 					translate.request.api.language = responseData.list; //进行缓存，下一次切换语言渲染的时候直接从缓存取，就不用在通过网络加载了
 					translate.selectLanguageTag.customUI(translate.selectLanguageTag.customLanguagesHandle(responseData.list));
 				}, null);
-			}else if(typeof(translate.request.api.language) == 'object'){
+			}else if(translate.request.api.language != null && typeof(translate.request.api.language) == 'object'){
 				//无网络环境下，自定义显示语种
 				translate.selectLanguageTag.customUI(translate.selectLanguageTag.customLanguagesHandle(translate.request.api.language));
 			}
@@ -760,6 +783,11 @@ var translate = {
 		 * 是否已初始化监听器
 		 */
 		initialized: false,
+
+		/**
+		 * message 监听函数引用，用于 reset() 时移除监听器。
+		 */
+		_messageHandler: null,
 
 		/**
 		 * 允许接收的跨域消息来源。
@@ -940,9 +968,18 @@ var translate = {
 			this.initialized = true;
 
 			var self = this;
-			window.addEventListener('message', function(event){
+			this._messageHandler = function(event){
 				self.handleMessage(event);
-			}, false);
+			};
+			window.addEventListener('message', this._messageHandler, false);
+		},
+
+		reset: function(){
+			if(this._messageHandler !== null){
+				window.removeEventListener('message', this._messageHandler, false);
+				this._messageHandler = null;
+			}
+			this.initialized = false;
 		},
 
 		/**
@@ -2160,7 +2197,7 @@ var translate = {
 					return;
 				}
 				var obj = await translate.storage.IndexedDB.get('hash_'+hash);
-				if(typeof(obj) == 'undefined' && obj == null){
+				if(typeof(obj) == 'undefined' || obj == null){
 					obj = {
 						originalText:originalText
 					};
@@ -2194,7 +2231,7 @@ var translate = {
 					//text = text + '\n' + originalText + '='+data[i].value.english.replace(/\n/g, "\\n").replace(/\t/g, "\\t");
 
 			    	//如果翻译结果不存在，可能是同语种本身就没有翻译，忽略就好了 （因为有个本地语种也强制翻译的能力，所以同语种也放行，在这里进行一次结果判断，免得遗漏同语种也翻译的情况）
-					if(typeof(data[i].value) === 'undefined' || typeof(data[i].value[to]) === 'undefined' || data[i].value[to] === null || data[i].value[to].trim().length === 0){
+					if(data[i].value == null || typeof(data[i].value[to]) !== 'string' || data[i].value[to].trim().length === 0){
 						continue;
 					}
 
@@ -2206,10 +2243,20 @@ var translate = {
 				const blob = new Blob([text], { type: "text/plain" });
 				const url = URL.createObjectURL(blob);
 				const link = document.createElement("a");
-				link.href = url;
-				link.download = to+".txt";
-				link.click();
-				URL.revokeObjectURL(url);
+				try{
+					link.href = url;
+					link.download = to+".txt";
+					link.style.display = "none";
+					(document.body || document.documentElement).appendChild(link);
+					link.click();
+				}finally{
+					setTimeout(function(){
+						if(link.parentNode){
+							link.parentNode.removeChild(link);
+						}
+						URL.revokeObjectURL(url);
+					}, 100);
+				}
 			},
 			/*js translate.offline.fullExtract.export end*/
 
@@ -2957,7 +3004,13 @@ var translate = {
 			//console.log('---listen');
 
 			//监听 - 增加到翻译历史里面 nodeHistory
-			if(typeof(this.taskQueue) != 'undefined' && Object.keys(this.taskQueue).length > 0){
+			var taskQueueSize = 0;
+			if(typeof(this.taskQueue) != 'undefined' && this.taskQueue != null){
+				// taskQueue 当前是 Map，必须使用 size 判断任务数量；保留 Object.keys 兜底，
+				// 避免后续扩展把 taskQueue 换成普通对象时影响 renderTaskFinish 的触发。
+				taskQueueSize = typeof(this.taskQueue.size) == 'number' ? this.taskQueue.size : Object.keys(this.taskQueue).length;
+			}
+			if(taskQueueSize > 0){
 				//50毫秒后执行，以便页面渲染完毕
 				var renderTask = this;
 				setTimeout(function() {
@@ -4136,6 +4189,9 @@ var translate = {
 			list:{}
 		};
 
+		// 当前 translate.execute 内部专用的 SSE 进度遮罩状态。
+		// 只传给 translate.request.sse.collectSafeProgressElements 使用，不作为全局状态保存。
+		let sseProgressState = {};
 
 		//进行掉接口翻译
 		for(var lang_index in fanyiLangs){ //一维数组，取语言
@@ -4217,6 +4273,302 @@ var translate = {
 				//text:JSON.stringify(translateTextArray[lang])
 				text:encodeURIComponent(JSON.stringify(translateTextArray[lang]))
 			};
+			let requestLang = lang;
+			let requestTo = translate.to;
+			// 记录当前这一次 translate.json 请求中已经通过 SSE 提前渲染过的原始 text 下标。
+			// done 事件仍然会返回完整结果，这里用于跳过已渲染下标，避免同一段 DOM 被重复替换。
+			let sseRenderedIndexMap = {};
+			// SSE 增量渲染的目标节点索引，只在当前 translate.execute() 闭包内生效。
+			// 以前每个 item/batch 都会反向扫描整批待翻译文本，文本上千且并发较高时会产生大量重复遍历。
+			// 这里按语种预先记录“原始 text 下标 -> 它会影响哪些 node+attribute”，后续只看当前下标涉及的目标，避免跨请求共享状态。
+			let sseRenderTargetStateMap = {};
+			let isTranslateNodeQueueAvailable = function(){
+				if(typeof(translate.nodeQueue[uuid]) == 'undefined'){
+					translate.log('提示：你很可能多次引入了 translate.js 所以造成了翻译本身的数据错乱，这只是个提示，它还是会给你正常翻译的，但是你最好不要重复引入太多次 translate.js ，正常情况下只需要引入一次 translate.js 就可以了。太多的话很可能会导致你页面卡顿');
+					return false;
+				}
+				return true;
+			};
+			let buildSseEventResponseData = function(requestData){
+				var responseData = {};
+				responseData.from = requestLang;
+				responseData.to = requestTo;
+				if(typeof(requestData) == 'object' && requestData != null){
+					if(typeof(requestData.from) != 'undefined' && requestData.from != null){
+						responseData.from = requestData.from;
+					}
+					if(typeof(requestData.to) != 'undefined' && requestData.to != null){
+						responseData.to = requestData.to;
+					}
+				}
+				return responseData;
+			};
+			let getSseRenderTargetState = function(renderLang){
+				if(typeof(sseRenderTargetStateMap[renderLang]) != 'undefined'){
+					return sseRenderTargetStateMap[renderLang];
+				}
+				var state = {
+					// targetMap 使用 DOM node 作为第一层 key，attribute 作为第二层 key，避免把 DOM 对象拼成字符串造成误判。
+					targetMap:new Map(),
+					// indexTargets[index] 保存这个原始 text 下标会影响的目标集合，用于后续 O(当前节点数) 判断。
+					indexTargets:[],
+					batchToken:0
+				};
+				if(typeof(translateHashArray[renderLang]) == 'undefined'){
+					sseRenderTargetStateMap[renderLang] = state;
+					return state;
+				}
+
+				for(var itemIndex = 0; itemIndex < translateHashArray[renderLang].length; itemIndex++){
+					var indexTargets = [];
+					state.indexTargets[itemIndex] = indexTargets;
+					var hash = translateHashArray[renderLang][itemIndex];
+					if(typeof(hash) == 'undefined'
+						|| typeof(translate.nodeQueue[uuid]['list']) == 'undefined'
+						|| typeof(translate.nodeQueue[uuid]['list'][renderLang]) == 'undefined'
+						|| typeof(translate.nodeQueue[uuid]['list'][renderLang][hash]) == 'undefined'
+						|| typeof(translate.nodeQueue[uuid]['list'][renderLang][hash].nodes) == 'undefined'){
+						continue;
+					}
+
+					var nodes = translate.nodeQueue[uuid]['list'][renderLang][hash].nodes;
+					for(var nodeIndex = 0; nodeIndex < nodes.length; nodeIndex++){
+						if(typeof(nodes[nodeIndex]) != 'object' || nodes[nodeIndex] == null || typeof(nodes[nodeIndex].node) == 'undefined' || nodes[nodeIndex].node == null){
+							continue;
+						}
+						var attribute = typeof(nodes[nodeIndex].attribute) == 'string' ? nodes[nodeIndex].attribute : '';
+						var attributeMap = state.targetMap.get(nodes[nodeIndex].node);
+						if(attributeMap == null){
+							attributeMap = new Map();
+							state.targetMap.set(nodes[nodeIndex].node, attributeMap);
+						}
+						var targetState = attributeMap.get(attribute);
+						if(targetState == null){
+							targetState = {
+								pending:0,
+								batchToken:0,
+								batchCount:0
+							};
+							attributeMap.set(attribute, targetState);
+						}
+
+						var alreadyInIndex = false;
+						for(var targetIndex = 0; targetIndex < indexTargets.length; targetIndex++){
+							if(indexTargets[targetIndex] === targetState){
+								alreadyInIndex = true;
+								break;
+							}
+						}
+						if(alreadyInIndex){
+							continue;
+						}
+						// pending 代表这个 node+attribute 还有多少原始 text 下标没有被 SSE 提前渲染。
+						// 后续判断只需要看当前事件是否覆盖了这些 pending 下标，不再全量扫描 translateHashArray。
+						targetState.pending++;
+						indexTargets.push(targetState);
+					}
+				}
+				sseRenderTargetStateMap[renderLang] = state;
+				return state;
+			};
+			let prepareSseRenderBatchState = function(renderLang, currentIndexMap, isSsePartial){
+				if(isSsePartial !== true){
+					return null;
+				}
+				var state = getSseRenderTargetState(renderLang);
+				state.batchToken++;
+				for(var itemIndexKey in currentIndexMap){
+					if(!currentIndexMap.hasOwnProperty(itemIndexKey)){
+						continue;
+					}
+					var itemIndex = parseInt(itemIndexKey, 10);
+					if(isNaN(itemIndex) || sseRenderedIndexMap[itemIndex] === 1){
+						continue;
+					}
+					var indexTargets = state.indexTargets[itemIndex];
+					if(typeof(indexTargets) == 'undefined' || indexTargets == null){
+						continue;
+					}
+					for(var targetIndex = 0; targetIndex < indexTargets.length; targetIndex++){
+						var targetState = indexTargets[targetIndex];
+						if(targetState.batchToken != state.batchToken){
+							targetState.batchToken = state.batchToken;
+							targetState.batchCount = 0;
+						}
+						// batchCount 只统计当前这次 SSE 事件中覆盖到的 pending 下标。
+						// 如果某个目标还有未包含在本事件里的文本，就继续等 done 兜底，避免提前替换打断长文本匹配。
+						targetState.batchCount++;
+					}
+				}
+				return state;
+			};
+			let canRenderSseItemNow = function(renderLang, itemIndex, isSsePartial, batchState){
+				if(isSsePartial !== true){
+					return true;
+				}
+				if(typeof(translateHashArray[renderLang]) == 'undefined' || typeof(translateHashArray[renderLang][itemIndex]) == 'undefined' || batchState == null){
+					return false;
+				}
+				var indexTargets = batchState.indexTargets[itemIndex];
+				if(typeof(indexTargets) == 'undefined' || indexTargets == null || indexTargets.length < 1){
+					return false;
+				}
+				// SSE 的 batch/item 会比 done 更早渲染。若同一个 DOM 节点里还有未返回的文本，
+				// 提前替换其中一段可能破坏后续长文本匹配；这种情况交给 done 统一兜底渲染。
+				for(var targetIndex = 0; targetIndex < indexTargets.length; targetIndex++){
+					var targetState = indexTargets[targetIndex];
+					var currentBatchCount = targetState.batchToken == batchState.batchToken ? targetState.batchCount : 0;
+					if(targetState.pending - currentBatchCount > 0){
+						return false;
+					}
+				}
+				return true;
+			};
+			let markSseItemRendered = function(renderLang, itemIndex, isSsePartial, batchState){
+				sseRenderedIndexMap[itemIndex] = 1;
+				if(isSsePartial !== true || batchState == null){
+					return;
+				}
+				var indexTargets = batchState.indexTargets[itemIndex];
+				if(typeof(indexTargets) == 'undefined' || indexTargets == null){
+					return;
+				}
+				for(var targetIndex = 0; targetIndex < indexTargets.length; targetIndex++){
+					if(indexTargets[targetIndex].pending > 0){
+						indexTargets[targetIndex].pending--;
+					}
+				}
+			};
+			let renderTranslateResultItems = function(responseData, requestData, items, isSsePartial){
+				if(!isTranslateNodeQueueAvailable()){
+					return 0;
+				}
+				if(typeof(responseData) != 'object' || responseData == null){
+					responseData = {};
+				}
+				var renderLang = requestLang;
+				var renderTo = requestTo;
+				if(typeof(responseData.from) != 'undefined' && responseData.from != null){
+					renderLang = responseData.from;
+				}else if(typeof(requestData) == 'object' && requestData != null && typeof(requestData.from) != 'undefined' && requestData.from != null){
+					renderLang = requestData.from;
+				}
+				if(typeof(responseData.to) != 'undefined' && responseData.to != null){
+					renderTo = responseData.to;
+				}else if(typeof(requestData) == 'object' && requestData != null && typeof(requestData.to) != 'undefined' && requestData.to != null){
+					renderTo = requestData.to;
+				}
+				if(typeof(translateHashArray[renderLang]) == 'undefined'){
+					translate.log('WARNING : translateHashArray['+renderLang+'] is undefined');
+					return 0;
+				}
+
+				var renderItems = [];
+				var currentIndexMap = {};
+				if(typeof(items) == 'object' && items != null && typeof(items.length) == 'number'){
+					for(var itemIndex = 0; itemIndex < items.length; itemIndex++){
+						if(typeof(items[itemIndex]) != 'object' || items[itemIndex] == null){
+							continue;
+						}
+						var originalIndex = parseInt(items[itemIndex].index, 10);
+						if(isNaN(originalIndex) || originalIndex < 0){
+							continue;
+						}
+						renderItems.push({
+							index:originalIndex,
+							text:items[itemIndex].text
+						});
+						currentIndexMap[originalIndex] = 1;
+					}
+				}else{
+					for(var fullIndex = 0; fullIndex < translateHashArray[renderLang].length; fullIndex++){
+						renderItems.push({
+							index:fullIndex,
+							text:typeof(responseData.text) == 'object' && responseData.text != null ? responseData.text[fullIndex] : null
+						});
+						currentIndexMap[fullIndex] = 1;
+					}
+				}
+				var sseRenderBatchState = prepareSseRenderBatchState(renderLang, currentIndexMap, isSsePartial);
+				var sseProgressRenderedIndexes = [];
+
+				let task = new translate.renderTask();
+				var renderNumber = 0;
+				for(var renderItemIndex = 0; renderItemIndex < renderItems.length; renderItemIndex++){
+					var i = renderItems[renderItemIndex].index;
+					if(sseRenderedIndexMap[i] === 1){
+						continue;
+					}
+					if(!canRenderSseItemNow(renderLang, i, isSsePartial, sseRenderBatchState)){
+						continue;
+					}
+
+					//翻译前的语种，如 english
+					var lang = renderLang;
+					//翻译后的内容
+					var text = renderItems[renderItemIndex].text;
+					//如果 text 为 null，说明服务端为了保持结果数组下标对齐填充了空结果，这种结果不能渲染。
+					if(text == null){
+						continue;
+					}
+
+					// 保留原有保护逻辑：如果译文完整包含原文，认为翻译结果不可信，回退显示原始文本。
+					// SSE 的 batch/item 与 done 都必须走同一判断，避免两种返回方式展示不一致。
+					if(typeof(text) == 'string' && typeof(translateTextArray[renderLang]) != 'undefined' && typeof(translateTextArray[renderLang][i]) == 'string' && text.toLowerCase().indexOf(translateTextArray[renderLang][i].toLowerCase()) > -1){
+						text = translateTextArray[renderLang][i];
+					}
+
+					//翻译前的 hash 对应下标，SSE 事件中的 index 永远对应原始 text 数组下标。
+					var hash = translateHashArray[renderLang][i];
+					if(typeof(hash) == 'undefined' || typeof(translate.nodeQueue[uuid]['list'][lang]) == 'undefined' || typeof(translate.nodeQueue[uuid]['list'][lang][hash]) == 'undefined'){
+						continue;
+					}
+					var cacheHash = translate.nodeQueue[uuid]['list'][lang][hash]['cacheHash'];
+
+					//取原始的词，还未经过翻译的、需要进行翻译的词。
+					var originalWord = '';
+					try{
+						originalWord = translate.nodeQueue[uuid]['list'][lang][hash]['original'];
+					}catch(e){
+						translate.log('uuid:'+uuid+', originalWord:'+originalWord+', lang:'+lang+', hash:'+hash+', text:'+text+', queue:'+translate.nodeQueue[uuid]);
+						translate.log(e);
+						continue;
+					}
+
+					for(var node_index = 0; node_index < translate.nodeQueue[uuid]['list'][lang][hash]['nodes'].length; node_index++){
+						task.add(translate.nodeQueue[uuid]['list'][lang][hash]['nodes'][node_index]['node'], originalWord, translate.nodeQueue[uuid]['list'][lang][hash]['nodes'][node_index]['beforeText']+text+translate.nodeQueue[uuid]['list'][lang][hash]['nodes'][node_index]['afterText'], translate.nodeQueue[uuid]['list'][lang][hash]['nodes'][node_index]['attribute']);
+					}
+
+					//将翻译结果写入浏览器缓存；SSE 提前渲染和 done 兜底渲染共用同一缓存规则。
+					translate.storage.set('hash_'+renderTo+'_'+cacheHash,text);
+					if(translate.offline.fullExtract.isUse){
+						translate.offline.fullExtract.set(hash, originalWord, renderTo, text);
+					}
+					markSseItemRendered(renderLang, i, isSsePartial, sseRenderBatchState);
+					if(isSsePartial === true){
+						// 这里只记录已经通过安全判断并加入渲染任务的 index；
+						// 解除遮罩必须等 task.execute() 完成后再做，避免 DOM 尚未替换完成时露出原文。
+						sseProgressRenderedIndexes.push(i);
+					}
+					renderNumber++;
+				}
+				if(renderNumber > 0){
+					task.execute(); //执行渲染任务
+					if(isSsePartial === true && sseProgressRenderedIndexes.length > 0){
+						var safeProgressElements = translate.request.sse.collectSafeProgressElements(sseProgressState, {
+							uuid:uuid,
+							fanyiLangs:fanyiLangs,
+							translateHashArray:translateHashArray,
+							renderLang:renderLang,
+							renderedIndexes:sseProgressRenderedIndexes
+						});
+						if(safeProgressElements.length > 0){
+							translate.progress.api.removeUITipByElements(safeProgressElements);
+						}
+					}
+				}
+				return renderNumber;
+			};
 			translate.request.post(url, data, function(responseData, requestData){
 				//console.log(data); 
 				//console.log(translateTextArray[data.from]);
@@ -4254,80 +4606,19 @@ var translate = {
 					return;
 				}
 				
-				if(typeof(translate.nodeQueue[uuid]) == 'undefined'){
-					translate.log('提示：你很可能多次引入了 translate.js 所以造成了翻译本身的数据错乱，这只是个提示，它还是会给你正常翻译的，但是你最好不要重复引入太多次 translate.js ，正常情况下只需要引入一次 translate.js 就可以了。太多的话很可能会导致你页面卡顿');
+				if(!isTranslateNodeQueueAvailable()){
 					return;
 				}
-
-				//console.log('-----待翻译3：----');
-				//console.log(translate.nodeQueue);
-				
-				//console.log('response:'+uuid);
-				let task = new translate.renderTask();
-				//遍历 translateHashArray
-				for(var i=0; i<translateHashArray[responseData.from].length; i++){
-					//翻译前的语种，如 english
-					var lang = responseData.from;	
-					//翻译后的内容
-					var text = responseData.text[i];	
-					//如果text为null，那么这个可能是一次翻译字数太多，为了保持数组长度，拼上的null
-					if(text == null){
-						continue;
-					}
-
-					// v3.0.3 添加，避免像是 JavaScript 被错误翻译为 “JavaScript的” ，然后出现了多个句子中都出现了Javascript时，会出现翻译后文本重复的问题
-					// 这里就是验证一下，翻译后的文本，是否会完全包含翻以前的文本，如果包含了，那么强制将翻译后的文本赋予翻译前的原始文本（也就是不被翻译）
-					if(text.toLowerCase().indexOf(translateTextArray[responseData.from][i].toLowerCase()) > -1){
-						//发现了，那么强制赋予翻以前内容
-						text = translateTextArray[responseData.from][i];
-					}
-
-
-					//翻译前的hash对应下标
-					var hash = translateHashArray[responseData.from][i];	
-					var cacheHash = translate.nodeQueue[uuid]['list'][lang][hash]['cacheHash'];
-
-
-					
-					//取原始的词，还未经过翻译的，需要进行翻译的词
-					var originalWord = '';
-					try{
-						originalWord = translate.nodeQueue[uuid]['list'][lang][hash]['original'];
-						//console.log('bef:'+translate.nodeQueue[uuid]['list'][lang][hash]['beforeText']);
-					}catch(e){
-						translate.log('uuid:'+uuid+', originalWord:'+originalWord+', lang:'+lang+', hash:'+hash+', text:'+text+', queue:'+translate.nodeQueue[uuid]);
-						translate.log(e);
-						continue;
-					}
-					
-					//for(var index = 0; index < translate.nodeQueue[lang][hash].length; index++){
-					for(var node_index = 0; node_index < translate.nodeQueue[uuid]['list'][lang][hash]['nodes'].length; node_index++){
-						//translate.nodeQueue[lang][hash]['nodes'][node_index].nodeValue = translate.nodeQueue[lang][hash]['nodes'][node_index].nodeValue.replace(new RegExp(originalWord,'g'), text);
-						//加入任务
-						task.add(translate.nodeQueue[uuid]['list'][lang][hash]['nodes'][node_index]['node'], originalWord, translate.nodeQueue[uuid]['list'][lang][hash]['nodes'][node_index]['beforeText']+text+translate.nodeQueue[uuid]['list'][lang][hash]['nodes'][node_index]['afterText'], translate.nodeQueue[uuid]['list'][lang][hash]['nodes'][node_index]['attribute']);
-					}
-					//}
-					/*
-					for(var index = 0; index < translate.nodeQueue[data.from][hash].length; index++){
-						translate.nodeQueue[data.from][hash][index].nodeValue = text;
-					}
-					*/
-					
-					//将翻译结果以 key：hash  value翻译结果的形式缓存
-					translate.storage.set('hash_'+responseData.to+'_'+cacheHash,text);
-					//如果离线翻译启用了全部提取，那么还要存入离线翻译指定存储
-					if(translate.offline.fullExtract.isUse){
-						translate.offline.fullExtract.set(hash, originalWord, responseData.to, text);
-					}
-				}
-				task.execute(); //执行渲染任务
+				renderTranslateResultItems(responseData, requestData, null, false);
 				//translate.temp_executeFinishNumber++; //记录执行完的次数
 
-				translate.translateRequest[uuid][lang].result = 1;
-				translate.translateRequest[uuid][lang].executeFinish = 1; //1是执行完毕
-				translate.translateRequest[uuid][lang].stoptime = Math.floor(Date.now() / 1000);
+				var finishLang = typeof(responseData.from) != 'undefined' && responseData.from != null ? responseData.from : requestData.from;
+				var finishTo = typeof(responseData.to) != 'undefined' && responseData.to != null ? responseData.to : requestData.to;
+				translate.translateRequest[uuid][finishLang].result = 1;
+				translate.translateRequest[uuid][finishLang].executeFinish = 1; //1是执行完毕
+				translate.translateRequest[uuid][finishLang].stoptime = Math.floor(Date.now() / 1000);
 				setTimeout(function(){
-					translate.waitingExecute.isAllExecuteFinish(uuid, responseData.from, responseData.to, 1, '');
+					translate.waitingExecute.isAllExecuteFinish(uuid, finishLang, finishTo, 1, '');
 				},5);
 			}, function(xhr){
 				translate.translateRequest[uuid][xhr.data.from].executeFinish = 1; //1是执行完毕
@@ -4344,6 +4635,21 @@ var translate = {
 					info = 'Network connection failed. url: '+xhr.requestURL;
 				}
 				translate.waitingExecute.isAllExecuteFinish(uuid, xhr.data.from, translate.to, 0, info);
+			}, {
+				onBatch:function(eventData, requestData){
+					if(typeof(eventData) != 'object' || eventData == null || typeof(eventData.items) != 'object' || eventData.items == null){
+						return;
+					}
+					// batch 是服务端已经确定的一批结果，按原始 text 下标提前渲染；不在这里标记请求完成。
+					renderTranslateResultItems(buildSseEventResponseData(requestData), requestData, eventData.items, true);
+				},
+				onItem:function(eventData, requestData){
+					if(typeof(eventData) != 'object' || eventData == null){
+						return;
+					}
+					// item 是服务端返回的单条 API 翻译结果，仍然只按原始 text 下标渲染当前条。
+					renderTranslateResultItems(buildSseEventResponseData(requestData), requestData, [eventData], true);
+				}
 			});
 			/*** 翻译end ***/
 		}
@@ -4893,7 +5199,7 @@ var translate = {
 
 					//input，要对 type=button、submit 的情况进行翻译
 					if(nodename == 'INPUT'){
-						if(typeof(node.attributes.type) != 'undefined' && typeof(node.attributes.type.nodeValue) != null && (node.attributes.type.nodeValue.toLowerCase() == 'button' || node.attributes.type.nodeValue.toLowerCase() == 'submit')){
+						if(node.attributes.type != null && typeof(node.attributes.type.nodeValue) === 'string' && (node.attributes.type.nodeValue.toLowerCase() == 'button' || node.attributes.type.nodeValue.toLowerCase() == 'submit')){
 							//console.log('----是 <input type="button"');
 							//取它的value
 							var input_value_node = node.attributes.value;
@@ -5090,7 +5396,8 @@ var translate = {
 					addLoad: true  如果没有添加 load 的事件，这里是空的，也就是通过判断 typeof(iframeMap.get(iframe).addLoad) === 'boolean' && iframeMap.get(iframe).addLoad === true 来判断是否已经添加 load 事件了
 					isTranslate: true 是否已经触发过 ifr.injectJs(); 翻译了， 如果已经触发过，则是true 也就是通过判断 typeof(iframeMap.get(iframe).isTranslate) === 'boolean' && iframeMap.get(iframe).isTranslate === true 来判断是否已经触发过
 			*/
-			iframeMap: new Map(),
+			// iframe 节点可能被页面动态移除，使用 WeakMap 避免缓存强引用导致节点无法释放。
+			iframeMap: new WeakMap(),
 			
 			/**
 			 * 通过URL判断iframe是否未跨域（true=未跨域，false=跨域）
@@ -5231,14 +5538,15 @@ var translate = {
 				if(translate.element.iframe.isUse === false){
 					return;
 				}
-				if(translate.element.iframe.iframeMap.get(iframeTag) === null || typeof(translate.element.iframe.iframeMap.get(iframeTag)) === 'undefined'){
-					translate.element.iframe.iframeMap.set(iframeTag, {});
-				}
-				
+
 				if(!translate.element.iframe.isIframeSameOrigin(iframeTag)){
 					//console.log('iframe跨域，忽略 - ');
 					//console.log(this.iframeTag);
 					return;
+				}
+
+				if(translate.element.iframe.iframeMap.get(iframeTag) === null || typeof(translate.element.iframe.iframeMap.get(iframeTag)) === 'undefined'){
+					translate.element.iframe.iframeMap.set(iframeTag, {});
 				}
 				
 				if(typeof(iframeTag.src) === 'string' && iframeTag.src.trim().length > 0){
@@ -6122,6 +6430,121 @@ var translate = {
 		
 	},
 
+	/*
+		将 wholeContext 行内文本组加入 translate.nodeQueue。
+
+		这个方法只创建一种受控的 wholeContext queue item，不在本提交中接入扫描、
+		请求、缓存或回填流程。普通 nodeQueue item 的结构保持不变；wholeContext
+		item 只通过 type:'wholeContext' 明确标记自己的特殊语义。
+
+		普通 item 的 nodes 表示“多个 DOM 节点共享同一个字符串译文”。
+		wholeContext item 的 nodes 表示“同一个上下文翻译组里的多个分段回填目标”，
+		因此必须满足：
+
+			translateText[i] 对应 nodes[i].node
+
+		这里不复用 addNodeQueueItem(...)，因为 addNodeQueueItem(...) 会按字符串
+		hash 合并相同文本节点；wholeContext 第一版必须让一个 group 对应一个独立
+		item，避免两个相同 group 共用 nodes 数组后破坏下标映射。
+
+		hash 使用 wholeContext 独立命名空间，并加入当前 execute uuid 和随机 uuid：
+		1. 避免 ["Please read ", "the docs"] 与普通 "Please read the docs" 混用同一个 hash。
+		2. 避免两个文本完全相同的 wholeContext group 合并到同一个 item。
+		3. 第一版不做 wholeContext 去重和缓存，避免引入 nodeGroups 等复杂结构。
+	*/
+	addWholeContextToQueue:function(uuid, group){
+		if(!translate.whole.context.isUse()){
+			return null;
+		}
+		if(group == null || typeof(group) == 'undefined'
+			|| typeof(group.nodes) == 'undefined'
+			|| typeof(group.texts) == 'undefined'
+			|| typeof(group.nodes.length) == 'undefined'
+			|| typeof(group.texts.length) == 'undefined'){
+			return null;
+		}
+		if(group.nodes.length < 2 || group.nodes.length !== group.texts.length){
+			return null;
+		}
+
+		for(var i = 0; i < group.texts.length; i++){
+			if(group.nodes[i] == null || typeof(group.nodes[i]) == 'undefined'){
+				return null;
+			}
+			if(typeof(group.texts[i]) !== 'string' || group.texts[i].trim().length == 0){
+				return null;
+			}
+
+			/*
+				普通 addNodeToQueue(...) 会用 originalText 判断节点是否已经入队。
+				wholeContext 后续接入扫描时也必须遵守这个根规则：如果某个 TextNode
+				已经被旧流程记录过，就不能再加入 wholeContext，避免同一节点重复进入
+				普通 item 和 wholeContext item。
+			*/
+			var nodeData = translate.node.get(group.nodes[i]);
+			if(nodeData != null && typeof(nodeData.originalText) === 'string'){
+				return null;
+			}
+		}
+
+		var contextText = group.texts.join('');
+		if(typeof(contextText) !== 'string' || contextText.trim().length == 0){
+			return null;
+		}
+
+		var textRecognition = translate.language.recognition(contextText);
+		var lang = translate.language.recognition_languageName_force(textRecognition);
+		if(typeof(lang) !== 'string' || lang.length == 0){
+			return null;
+		}
+
+		if(typeof(translate.nodeQueue[uuid]) == 'undefined' || translate.nodeQueue[uuid] == null){
+			translate.nodeQueue[uuid] = new Array();
+			translate.nodeQueue[uuid]['expireTime'] = Date.now() + 120*1000;
+			translate.nodeQueue[uuid]['list'] = new Array();
+		}
+		if(translate.nodeQueue[uuid]['list'][lang] == null || typeof(translate.nodeQueue[uuid]['list'][lang]) == 'undefined'){
+			translate.nodeQueue[uuid]['list'][lang] = new Array();
+		}
+
+		var hashSeed = 'wholeContext:'+uuid+':'+translate.util.uuid()+':'+JSON.stringify(group.texts);
+		var hash = translate.util.hash(hashSeed);
+		if(translate.nodeQueue[uuid]['list'][lang][hash] != null && typeof(translate.nodeQueue[uuid]['list'][lang][hash]) != 'undefined'){
+			// 理论上随机 uuid 已经足够避免冲突；这里保守跳过，避免覆盖已有队列项。
+			return null;
+		}
+
+		translate.nodeQueue[uuid]['list'][lang][hash] = new Array();
+		translate.nodeQueue[uuid]['list'][lang][hash]['type'] = 'wholeContext';
+		translate.nodeQueue[uuid]['list'][lang][hash]['nodes'] = new Array();
+		translate.nodeQueue[uuid]['list'][lang][hash]['original'] = contextText;
+		translate.nodeQueue[uuid]['list'][lang][hash]['translateText'] = group.texts.slice(0);
+
+		for(var nodeIndex = 0; nodeIndex < group.nodes.length; nodeIndex++){
+			var node = group.nodes[nodeIndex];
+			var text = group.texts[nodeIndex];
+
+			if(translate.node.get(node) == null){
+				translate.node.set(node, {});
+			}
+			translate.node.get(node).attribute = '';
+			translate.node.get(node).originalText = text;
+			translate.node.get(node).whole = true;
+			if(typeof(translate.node.get(node).translateTexts) === 'undefined'){
+				translate.node.get(node).translateTexts = {};
+			}
+			translate.node.get(node).translateTexts[text] = null;
+
+			translate.nodeQueue[uuid]['list'][lang][hash]['nodes'][nodeIndex] = new Array();
+			translate.nodeQueue[uuid]['list'][lang][hash]['nodes'][nodeIndex]['node'] = node;
+			translate.nodeQueue[uuid]['list'][lang][hash]['nodes'][nodeIndex]['attribute'] = '';
+			translate.nodeQueue[uuid]['list'][lang][hash]['nodes'][nodeIndex]['beforeText'] = '';
+			translate.nodeQueue[uuid]['list'][lang][hash]['nodes'][nodeIndex]['afterText'] = '';
+		}
+
+		return translate.nodeQueue[uuid]['list'][lang][hash];
+	},
+
 	//全部翻译，node内容全部翻译，而不是进行语种提取，直接对node本身的全部内容拿出来进行直接全部翻译
 	whole:{
 		isEnableAll:false, //是否开启对整个html页面的整体翻译，也就是整个页面上所有存在的能被翻译的全部会采用整体翻译的方式。默认是 false不开启		
@@ -6136,6 +6559,297 @@ var translate = {
 		class:[],
 		tag:[],
 		id:[],
+
+		/*
+			whole 行内上下文分段翻译的根开关。
+
+			默认关闭：
+			1. 旧用户即使已经使用 translate.whole，也不会自动进入新的分段上下文请求。
+			2. 只有明确调用 translate.whole.context.use() 后，后续 wholeContext 收集才允许生效。
+			3. 这里不直接触发扫描、入队或请求，只作为后续能力的兼容性开关。
+		*/
+		context:{
+			is_use:false,
+
+			// 开启 whole 行内上下文分段翻译能力；只设置开关，不立即扫描或发起请求。
+			use:function(){
+				translate.whole.context.is_use = true;
+			},
+
+			// 判断 whole 行内上下文分段翻译能力是否已启用，供后续扫描、入队、请求逻辑统一使用。
+			isUse:function(){
+				return translate.whole.context.is_use === true;
+			},
+
+			/*
+				只判断当前元素自身是否命中 translate.whole.tag/class/id。
+				不能复用 translate.whole.isWhole()，因为 isWhole() 会向父级追溯；
+				wholeContext 的收集根必须只认当前元素，否则子元素会重复触发收集。
+				这里不接入 translate.whole.isEnableAll，避免全页面级上下文收集过大。
+			*/
+			isRootElement:function(ele){
+				if(!translate.whole.context.isUse()){
+					return false;
+				}
+				if(ele == null || typeof(ele) == 'undefined' || ele.nodeType !== 1){
+					return false;
+				}
+
+				var nodename = translate.element.getNodeName(ele).toLowerCase();
+				if(nodename.length == 0 || nodename === 'html'){
+					return false;
+				}
+
+				if(translate.whole.tag.length > 0 && translate.whole.tag.indexOf(nodename) > -1){
+					return true;
+				}
+
+				if(translate.whole.id.length > 0 && typeof(ele.id) === 'string' && ele.id.length > 0 && translate.whole.id.indexOf(ele.id) > -1){
+					return true;
+				}
+
+				if(translate.whole.class.length > 0 && typeof(ele.className) === 'string'){
+					var className = ele.className.trim();
+					if(className.length > 0){
+						var classNames = className.split(/\s+/);
+						for(var i = 0; i < classNames.length; i++){
+							if(translate.whole.class.indexOf(classNames[i]) > -1){
+								return true;
+							}
+						}
+					}
+				}
+
+				return false;
+			},
+
+			/*
+				判断元素是否应切断 wholeContext 行内文本流。
+
+				这个方法服务于后续的 wholeContext 收集函数：当一个 translate.whole
+				容器中同时存在 TextNode、a、span 等行内节点时，收集函数会尽量把
+				连续的行内文本组成一个上下文翻译组；但遇到 br、块级元素、code、
+				ignore、translate="no" 等边界时，必须结束当前组，避免把不应该共用
+				上下文的文本强行合并。
+
+				示例：
+				<p>
+					Please <a>read the docs</a><br><code>npm install</code> before use.
+				</p>
+
+				后续收集 p 的子节点时：
+				1. "Please " 和 a 中的 "read the docs" 可以归入同一个行内上下文组。
+				2. br 会让本方法返回 true，从而结束当前组。
+				3. code 也会返回 true，代码内容不参与翻译，也不跨 code 合并上下文。
+				4. " before use." 会在边界之后作为新的文本流重新开始判断。
+
+				这里故意只做静态、保守的边界判断，不读取 getComputedStyle()。
+				原因是 DOM 扫描阶段可能会频繁调用本方法，如果读取运行时样式，
+				浏览器可能触发布局计算，增加页面翻译时的性能成本。第一版先用
+				明确的标签、属性、class 和 translate.ignore 规则保证行为可控。
+
+				translate.ignore.isIgnore(ele) 会向父级追溯并执行用户自定义 ignore
+				函数，成本比普通标签和属性判断更高，所以放在最后执行。
+			*/
+			isBreakElement:function(ele){
+				if(ele == null || typeof(ele) == 'undefined' || ele.nodeType !== 1){
+					return true;
+				}
+
+				var nodename = translate.element.getNodeName(ele).toLowerCase();
+				switch(nodename){
+					case 'br':
+					case 'hr':
+					case 'pre':
+					case 'code':
+					case 'script':
+					case 'style':
+					case 'template':
+					case 'noscript':
+					case 'iframe':
+					case 'canvas':
+					case 'svg':
+					case 'math':
+					case 'div':
+					case 'p':
+					case 'section':
+					case 'article':
+					case 'header':
+					case 'footer':
+					case 'main':
+					case 'nav':
+					case 'aside':
+					case 'blockquote':
+					case 'h1':
+					case 'h2':
+					case 'h3':
+					case 'h4':
+					case 'h5':
+					case 'h6':
+					case 'table':
+					case 'thead':
+					case 'tbody':
+					case 'tfoot':
+					case 'tr':
+					case 'td':
+					case 'th':
+					case 'ul':
+					case 'ol':
+					case 'li':
+					case 'dl':
+					case 'dt':
+					case 'dd':
+					case 'figure':
+					case 'figcaption':
+					case 'form':
+					case 'input':
+					case 'textarea':
+					case 'select':
+					case 'option':
+					case 'button':
+						return true;
+				}
+
+				if(ele.hidden === true || (ele.getAttribute && ele.getAttribute('hidden') !== null)){
+					return true;
+				}
+
+				if(ele.getAttribute){
+					var translateAttr = ele.getAttribute('translate');
+					if(typeof(translateAttr) === 'string' && translateAttr.toLowerCase() === 'no'){
+						return true;
+					}
+				}
+
+				if(ele.isContentEditable === true){
+					return true;
+				}
+
+				if(typeof(ele.className) === 'string'){
+					var className = ele.className.trim();
+					if(className.length > 0){
+						var classNames = className.split(/\s+/);
+						for(var i = 0; i < classNames.length; i++){
+							if(classNames[i] === 'notranslate'){
+								return true;
+							}
+						}
+					}
+				}
+
+				if(translate.ignore.isIgnore(ele)){
+					return true;
+				}
+
+				return false;
+			},
+
+			/*
+				收集 wholeContext 根元素内连续的行内 TextNode。
+
+				返回值只是一组临时扫描结果：
+				[
+					{
+						nodes: [textNode1, textNode2],
+						texts: ["Please read ", "the docs"]
+					}
+				]
+
+				这里不标记 TextNode，也不加入 nodeQueue；后续接入入队能力时，
+				再决定哪些 group 需要真正进入翻译队列。这样可以避免当前提交
+				因为半成品逻辑跳过旧翻译流程。
+
+				注意：
+				1. 从 root.childNodes 开始遍历，而不是直接 walk(root)。root 本身
+				   通常是 p、div 等 whole 容器，如果把 root 交给 isBreakElement(root)，
+				   会被块级规则直接切断，导致完全收集不到内容。
+				2. 参与收集的 TextNode 必须先通过 nodeAnalyse.gets(node) 和
+				   translate.ignore.isIgnore(...) 这两层旧流程判断；wholeContext 只改变
+				   上下文组织方式，不新增旧流程不翻译的节点。
+				3. 空白、换行、缩进 TextNode 按旧流程视为空文本，不参与 wholeContext。
+				   如果多个 segment 之间需要空格辅助翻译，应由后端 segment-aware 接口
+				   根据语言和标点在内部处理，前端不在 DOM 结构外主动补空格。
+				4. 只有跨多个有效 TextNode 的文本流才返回 group；单个 TextNode 继续走旧流程。
+			*/
+			collectInlineTextGroups:function(root){
+				var groups = [];
+				if(!translate.whole.context.isRootElement(root)){
+					return groups;
+				}
+
+				var currentGroup = {nodes:[], texts:[]};
+
+				var flushGroup = function(){
+					if(currentGroup.nodes.length > 1){
+						groups.push(currentGroup);
+					}
+					currentGroup = {nodes:[], texts:[]};
+				};
+
+				var appendTextNode = function(node){
+					/*
+						必须复用旧流程的 nodeAnalyse.gets(node)，不能直接读取 node.nodeValue。
+						这样 wholeContext 只改变“多个 TextNode 如何组成上下文”，不改变
+						“哪些 TextNode 有资格参与翻译”的根规则。
+					*/
+					var nodeAnalyChild = translate.element.nodeAnalyse.gets(node);
+					for(var nci = 0; nci < nodeAnalyChild.length; nci++){
+						if(nodeAnalyChild[nci].attribute !== '' || nodeAnalyChild[nci].node !== node){
+							continue;
+						}
+
+						if(translate.ignore.isIgnore(node, {node: nodeAnalyChild[nci].node, attribute: nodeAnalyChild[nci].attribute})){
+							flushGroup();
+							return;
+						}
+
+						currentGroup.nodes.push(nodeAnalyChild[nci].node);
+						currentGroup.texts.push(nodeAnalyChild[nci].text);
+					}
+				};
+
+				var walk = function(node){
+					if(node == null || typeof(node) == 'undefined'){
+						flushGroup();
+						return;
+					}
+
+					if(node.nodeType === 3){
+						appendTextNode(node);
+						return;
+					}
+
+					if(node.nodeType !== 1){
+						flushGroup();
+						return;
+					}
+
+					if(translate.whole.context.isBreakElement(node)){
+						flushGroup();
+						return;
+					}
+
+					var childNodes = node.childNodes;
+					if(childNodes == null || typeof(childNodes) == 'undefined'){
+						return;
+					}
+					for(var i = 0; i < childNodes.length; i++){
+						walk(childNodes[i]);
+					}
+				};
+
+				var childNodes = root.childNodes;
+				if(childNodes == null || typeof(childNodes) == 'undefined'){
+					return groups;
+				}
+				for(var i = 0; i < childNodes.length; i++){
+					walk(childNodes[i]);
+				}
+				flushGroup();
+
+				return groups;
+			}
+		},
 
 		//运行时出现自检并在浏览器控制台提示性文本。 
 		//在执行翻译，也就是 execute() 时，会调用此方法。
@@ -9060,7 +9774,7 @@ var translate = {
 			 * v2.8.2 增加数组形态，如 ['https://api.translate.zvo.cn/','xxxxx'] 
 			 */
 			//host:'https://api.translate.zvo.cn/',
-			host:['https://api.translate.zvo.cn/','https://api.translate.china.leimingyun.com/','https://america.api.translate.zvo.cn/'],
+			host:['https://api.translate.zvo.cn/','https://america.api.translate.zvo.cn/'],
 			//host的备用接口，格式同host，可以填写多个，只不过这里是数组格式。只有当主 host 无法连通时，才会采用备host来提供访问。如果为空也就是 [] 则是不采用备方案。
 			//backupHost:['',''],
 			language:'language.json', //获取支持的语种列表接口
@@ -9069,6 +9783,535 @@ var translate = {
 			connectTest:'connectTest.json',	//用于 translate.js 多节点翻译自动检测网络连通情况
 			init:'init.json', //获取最新版本号，跟当前版本进行比对，用于提醒版本升级等使用
 
+		},
+		// translate.json 的 SSE 流式响应能力。默认关闭，开启后仍然保留 XHR JSON 降级路径。
+		sse:{
+			use:false,
+			/**
+			 * 所有 SSE 事件的统一旁路回调。
+			 * <p>当前步骤先建立协议读取能力，不在这里直接改 DOM 渲染主流程。后续接入渐进渲染时，
+			 * 可以在 translate.execute() 的翻译请求上下文中消费 batch/item。</p>
+			 */
+			onEvent:null,
+			onBatch:null,
+			onItem:null,
+			onDone:null,
+			onError:null,
+			start:function(){
+				translate.request.sse.use = true;
+			},
+			stop:function(){
+				translate.request.sse.use = false;
+			},
+			/**
+			 * 判断当前浏览器是否具备 POST SSE 所需的基础能力。
+			 * <p>EventSource 只适合 GET，不适合当前 translate.json 的 POST 表单请求；这里必须依赖
+			 * fetch + ReadableStream 主动读取 text/event-stream。</p>
+			 * <p>这里仅做浏览器能力的同步判断，不判断服务端是否真的返回 text/event-stream；
+			 * 服务端响应类型仍由 translate.request.sse.post() 收到 response 后再兜底校验。</p>
+			 */
+			isSupport:function(){
+				if(typeof(window) == 'undefined'
+					|| typeof(window.fetch) != 'function'
+					|| typeof(window.TextDecoder) != 'function'
+					|| typeof(window.Promise) != 'function'
+					|| typeof(window.Response) != 'function'){
+					return false;
+				}
+				try{
+					var response = new window.Response('');
+					return response.body != null && typeof(response.body.getReader) == 'function';
+				}catch(e){
+					return false;
+				}
+			},
+			/**
+			 * 解析一段完整的 SSE 事件文本块。
+			 *
+			 * @param block 不包含空行分隔符的 SSE 文本块
+			 * @return {name, data, dataText, dispatch}
+			 */
+			parseEventBlock:function(block){
+				var eventName = 'message';
+				var dataLines = [];
+				var hasDataField = false;
+				var lines = block.split('\n');
+				for(var i = 0; i < lines.length; i++){
+					var line = lines[i];
+					if(line.length == 0){
+						continue;
+					}
+					if(line.indexOf(':') == 0){
+						// SSE 允许服务端发送 ": xxx" 注释行作为心跳；注释不属于业务事件，必须忽略。
+						continue;
+					}
+					var separatorIndex = line.indexOf(':');
+					var field = line;
+					var value = '';
+					if(separatorIndex > -1){
+						field = line.substring(0, separatorIndex);
+						value = line.substring(separatorIndex+1);
+						if(value.indexOf(' ') == 0){
+							// SSE 规范只剥离冒号后的一个前导空格，避免破坏 data 正文中的有效空格。
+							value = value.substring(1);
+						}
+					}
+					if(field == 'event'){
+						eventName = value;
+					}else if(field == 'data'){
+						hasDataField = true;
+						dataLines.push(value);
+					}
+				}
+				var dataText = dataLines.join('\n');
+				var data = dataText;
+				if(dataText.length > 0){
+					try{
+						data = JSON.parse(dataText);
+					}catch(e){
+						// data 不一定必须是 JSON，解析失败时保留原始字符串，避免因为服务端扩展事件导致流被中断。
+						data = dataText;
+					}
+				}
+				return {
+					// event: 为空时按 SSE 规范回落为 message，避免空事件名阻断统一 onEvent 监听。
+					name:eventName.length > 0 ? eventName : 'message',
+					data:data,
+					dataText:dataText,
+					// 只有包含 data 字段的事件才应该派发；纯心跳、id、retry 等控制块不能触发业务回调。
+					dispatch:hasDataField
+				};
+			},
+			/**
+			 * 触发 SSE 事件旁路回调。
+			 * <p>这些回调不能影响主请求结果；回调异常只记录日志，不中断后续 done/error 处理。</p>
+			 */
+			triggerEvent:function(eventName, eventData, requestData, sseCallbacks){
+				var runCallback = function(owner, callback, args, callbackName){
+					if(typeof(callback) != 'function'){
+						return;
+					}
+					try{
+						// 每个回调单独捕获异常，避免某个监听失败后阻断同一事件的后续监听。
+						callback.apply(owner, args);
+					}catch(e){
+						translate.log('translate.request.sse '+callbackName+' callback error: '+e.message);
+					}
+				};
+				// 单次请求回调用于 translate.execute() 这种带有请求上下文的消费场景。
+				// 这里不复用全局 onBatch/onItem，避免多个翻译请求并发时互相覆盖回调状态。
+				if(typeof(sseCallbacks) == 'object' && sseCallbacks != null){
+					runCallback(sseCallbacks, sseCallbacks.onEvent, [eventName, eventData, requestData], 'onEvent');
+					if(eventName == 'batch'){
+						runCallback(sseCallbacks, sseCallbacks.onBatch, [eventData, requestData], 'onBatch');
+					}else if(eventName == 'item'){
+						runCallback(sseCallbacks, sseCallbacks.onItem, [eventData, requestData], 'onItem');
+					}else if(eventName == 'done'){
+						runCallback(sseCallbacks, sseCallbacks.onDone, [eventData, requestData], 'onDone');
+					}else if(eventName == 'error'){
+						runCallback(sseCallbacks, sseCallbacks.onError, [eventData, requestData], 'onError');
+					}
+				}
+				runCallback(translate.request.sse, translate.request.sse.onEvent, [eventName, eventData, requestData], 'global onEvent');
+				if(eventName == 'batch'){
+					runCallback(translate.request.sse, translate.request.sse.onBatch, [eventData, requestData], 'global onBatch');
+				}else if(eventName == 'item'){
+					runCallback(translate.request.sse, translate.request.sse.onItem, [eventData, requestData], 'global onItem');
+				}else if(eventName == 'done'){
+					runCallback(translate.request.sse, translate.request.sse.onDone, [eventData, requestData], 'global onDone');
+				}else if(eventName == 'error'){
+					runCallback(translate.request.sse, translate.request.sse.onError, [eventData, requestData], 'global onError');
+				}
+			},
+			/**
+			 * 收集本次 SSE 安全增量渲染后，可以提前移除翻译进度遮罩的元素。
+			 * <p>这里不直接改 DOM，只根据当前 translate.execute 的临时状态做输入输出，方便后续排查。
+			 * 如果判断异常，只记录日志并返回空数组，剩余遮罩仍会在最终 translateNetworkAfter 中统一清理。</p>
+			 *
+			 * @param state 当前 translate.execute 闭包内的 SSE 进度状态
+			 * @param data {uuid, fanyiLangs, translateHashArray, renderLang, renderedIndexes}
+			 * @return 可以安全取消遮罩的元素数组
+			 */
+			collectSafeProgressElements:function(state, data){
+				var logPrefix = 'translate.request.sse.collectSafeProgressElements';
+				try{
+					if(translate.progress.api.use !== true || translate.progress.api.isTip !== true){
+						return [];
+					}
+					if(typeof(state) != 'object' || state == null){
+						translate.log(logPrefix+' 参数异常：state 不是对象');
+						return [];
+					}
+					if(typeof(data) != 'object' || data == null){
+						translate.log(logPrefix+' 参数异常：data 不是对象');
+						return [];
+					}
+					if(typeof(data.uuid) == 'undefined' || data.uuid == null){
+						translate.log(logPrefix+' 参数异常：uuid 为空');
+						return [];
+					}
+					if(typeof(data.renderLang) != 'string' || data.renderLang.length < 1){
+						translate.log(logPrefix+' 参数异常：renderLang 为空');
+						return [];
+					}
+					if(typeof(data.renderedIndexes) != 'object' || data.renderedIndexes == null || typeof(data.renderedIndexes.length) != 'number'){
+						translate.log(logPrefix+' 参数异常：renderedIndexes 不是数组');
+						return [];
+					}
+					if(typeof(data.fanyiLangs) != 'object' || data.fanyiLangs == null || typeof(data.fanyiLangs.length) != 'number'){
+						translate.log(logPrefix+' 参数异常：fanyiLangs 不是数组');
+						return [];
+					}
+					if(typeof(data.translateHashArray) != 'object' || data.translateHashArray == null){
+						translate.log(logPrefix+' 参数异常：translateHashArray 不是对象');
+						return [];
+					}
+					if(typeof(data.translateHashArray[data.renderLang]) == 'undefined'){
+						translate.log(logPrefix+' 数据异常：translateHashArray 中不存在 renderLang '+data.renderLang);
+						return [];
+					}
+					if(typeof(translate.nodeQueue[data.uuid]) == 'undefined' || translate.nodeQueue[data.uuid] == null || typeof(translate.nodeQueue[data.uuid]['list']) == 'undefined'){
+						translate.log(logPrefix+' 数据异常：nodeQueue 中不存在 uuid '+data.uuid);
+						return [];
+					}
+
+					var buildIndexElements = function(lang, itemIndex){
+						var resultElements = [];
+						var elementMap = new Map();
+						if(typeof(data.translateHashArray[lang]) == 'undefined' || typeof(data.translateHashArray[lang][itemIndex]) == 'undefined'){
+							translate.log(logPrefix+' 数据异常：未找到 translateHashArray，uuid:'+data.uuid+', lang:'+lang+', index:'+itemIndex);
+							return resultElements;
+						}
+						var hash = data.translateHashArray[lang][itemIndex];
+						if(typeof(translate.nodeQueue[data.uuid]['list'][lang]) == 'undefined'
+							|| typeof(translate.nodeQueue[data.uuid]['list'][lang][hash]) == 'undefined'
+							|| typeof(translate.nodeQueue[data.uuid]['list'][lang][hash].nodes) == 'undefined'){
+							translate.log(logPrefix+' 数据异常：未找到渲染 index 对应的 nodeQueue，uuid:'+data.uuid+', lang:'+lang+', index:'+itemIndex);
+							return resultElements;
+						}
+						var nodes = translate.nodeQueue[data.uuid]['list'][lang][hash].nodes;
+						for(var nodeIndex = 0; nodeIndex < nodes.length; nodeIndex++){
+							if(typeof(nodes[nodeIndex]) != 'object' || nodes[nodeIndex] == null || typeof(nodes[nodeIndex].node) == 'undefined' || nodes[nodeIndex].node == null){
+								continue;
+							}
+							var elements = translate.element.nodeToElement([nodes[nodeIndex].node]);
+							for(var elementIndex = 0; elementIndex < elements.length; elementIndex++){
+								elementMap.set(elements[elementIndex], elements[elementIndex]);
+							}
+						}
+						for(let element of elementMap.keys()){
+							resultElements.push(element);
+						}
+						return resultElements;
+					};
+
+					if(state.initialized !== true){
+						state.elementPendingMap = new Map();
+						state.indexElementMap = {};
+						state.renderedIndexMap = {};
+						for(var langIndex = 0; langIndex < data.fanyiLangs.length; langIndex++){
+							var lang = data.fanyiLangs[langIndex];
+							if(typeof(lang) != 'string' || lang.length < 1){
+								continue;
+							}
+							if(typeof(data.translateHashArray[lang]) == 'undefined'){
+								translate.log(logPrefix+' 数据异常：初始化时 translateHashArray 中不存在 lang '+lang);
+								continue;
+							}
+							state.indexElementMap[lang] = [];
+							for(var itemIndex = 0; itemIndex < data.translateHashArray[lang].length; itemIndex++){
+								var indexElements = buildIndexElements(lang, itemIndex);
+								state.indexElementMap[lang][itemIndex] = indexElements;
+								for(var elementIndex = 0; elementIndex < indexElements.length; elementIndex++){
+									var pending = state.elementPendingMap.get(indexElements[elementIndex]);
+									state.elementPendingMap.set(indexElements[elementIndex], typeof(pending) == 'number' ? pending + 1 : 1);
+								}
+							}
+						}
+						state.initialized = true;
+					}
+
+					if(state.elementPendingMap == null || typeof(state.elementPendingMap.get) != 'function'){
+						translate.log(logPrefix+' 状态异常：elementPendingMap 不存在');
+						return [];
+					}
+					if(typeof(state.indexElementMap) != 'object' || state.indexElementMap == null){
+						translate.log(logPrefix+' 状态异常：indexElementMap 不存在');
+						return [];
+					}
+					if(typeof(state.renderedIndexMap) != 'object' || state.renderedIndexMap == null){
+						state.renderedIndexMap = {};
+					}
+
+					var safeElementMap = new Map();
+					var renderedIndexMap = {};
+					for(var renderedIndex = 0; renderedIndex < data.renderedIndexes.length; renderedIndex++){
+						var itemIndex = parseInt(data.renderedIndexes[renderedIndex], 10);
+						if(isNaN(itemIndex) || itemIndex < 0){
+							translate.log(logPrefix+' 参数异常：renderedIndexes 中存在非法 index，uuid:'+data.uuid+', lang:'+data.renderLang+', index:'+data.renderedIndexes[renderedIndex]);
+							continue;
+						}
+						if(renderedIndexMap[itemIndex] === 1){
+							continue;
+						}
+						renderedIndexMap[itemIndex] = 1;
+
+						var renderedKey = data.renderLang+'_'+itemIndex;
+						if(state.renderedIndexMap[renderedKey] === 1){
+							continue;
+						}
+						state.renderedIndexMap[renderedKey] = 1;
+
+						if(typeof(state.indexElementMap[data.renderLang]) == 'undefined' || typeof(state.indexElementMap[data.renderLang][itemIndex]) == 'undefined'){
+							translate.log(logPrefix+' 状态异常：未找到 indexElementMap，uuid:'+data.uuid+', lang:'+data.renderLang+', index:'+itemIndex);
+							continue;
+						}
+						var indexElements = state.indexElementMap[data.renderLang][itemIndex];
+						for(var elementIndex = 0; elementIndex < indexElements.length; elementIndex++){
+							var pending = state.elementPendingMap.get(indexElements[elementIndex]);
+							if(typeof(pending) != 'number'){
+								translate.log(logPrefix+' 状态异常：elementPendingMap 中未找到元素 pending，uuid:'+data.uuid+', lang:'+data.renderLang+', index:'+itemIndex);
+								continue;
+							}
+							pending--;
+							if(pending > 0){
+								state.elementPendingMap.set(indexElements[elementIndex], pending);
+							}else{
+								state.elementPendingMap.delete(indexElements[elementIndex]);
+								safeElementMap.set(indexElements[elementIndex], indexElements[elementIndex]);
+							}
+						}
+					}
+
+					var safeElements = [];
+					for(let element of safeElementMap.keys()){
+						safeElements.push(element);
+					}
+					return safeElements;
+				}catch(e){
+					translate.log(logPrefix+' 执行异常：'+e.message);
+					return [];
+				}
+			},
+			/**
+			 * 使用 fetch + ReadableStream 发起 translate.json SSE POST 请求。
+			 * <p>返回 true 表示请求已经由 SSE 接管；如果浏览器不支持流式读取会返回 false，让调用方继续走 XHR。
+			 * 如果 fetch 在收到任何 SSE 事件前失败，会调用 fallbackFunc 降级到原 JSON 请求。</p>
+			 * <p>如果服务端返回 200 但不是 text/event-stream，说明服务端按普通 translate.json 响应了；
+			 * 此时直接消费当前响应，避免同一批大文本再发起一次 XHR 请求。</p>
+			 */
+			post:function(path, data, func, abnormalFunc, fallbackFunc, sseCallbacks){
+				if(!translate.request.sse.isSupport()){
+					return false;
+				}
+
+				var url = translate.request.getUrl(path);
+				var params = translate.request.buildPostParams(data, {stream:'1'});
+				var headers = translate.request.buildHeaders({
+					'content-type':'application/x-www-form-urlencoded',
+					'Accept':'text/event-stream'
+				});
+				var requestState = {
+					data:data,
+					requestURL:url,
+					status:0,
+					readyState:0,
+					responseText:'',
+					response:'',
+					// SSE 没有原生 XMLHttpRequest 对象。这里仅标记当前是 SSE 最小兼容响应对象，
+					// 供 translate.request.response(xhr) 的旧扩展代码识别来源，避免误认为它是完整 XHR。
+					sse:true
+				};
+				var hasEvent = false;
+				var finished = false;
+				var fallbacked = false;
+				var responseTriggered = false;
+				var triggerResponse = function(responseData){
+					if(responseTriggered){
+						return;
+					}
+					responseTriggered = true;
+					requestState.readyState = 4;
+					if(typeof(responseData) != 'undefined'){
+						try{
+							// 保持与普通 translate.json 尽量接近：最终 done/error 的 data 作为响应正文。
+							// batch/item 只是流式中间结果，不写入 responseText，也不触发 response 回调。
+							requestState.responseText = typeof(responseData) == 'string' ? responseData : JSON.stringify(responseData);
+						}catch(e){
+							requestState.responseText = '';
+						}
+						requestState.response = requestState.responseText;
+					}
+					try{
+						translate.request.response(requestState);
+					}catch(e){
+						// 用户自定义 response 回调不能影响 SSE 网络状态，否则 Promise catch 会误判为请求失败。
+						translate.log('translate.request.response SSE callback error: '+e.message);
+					}
+				};
+				var callFallback = function(){
+					if(fallbacked){
+						return;
+					}
+					fallbacked = true;
+					if(typeof(fallbackFunc) == 'function'){
+						fallbackFunc();
+					}
+				};
+				var callAbnormalFunc = function(){
+					if(typeof(abnormalFunc) != 'function'){
+						return;
+					}
+					try{
+						abnormalFunc(requestState);
+					}catch(e){
+						// abnormalFunc 是用户异常回调，它自身的异常应暴露给调用方，
+						// 但不能再次进入 fetch/read 的 Promise catch 被包装成新的 SSE 网络异常。
+						setTimeout(function(){
+							throw e;
+						}, 0);
+					}
+				};
+				var callAbnormal = function(info){
+					requestState.info = info;
+					triggerResponse();
+					callAbnormalFunc();
+				};
+				var callResponseFunc = function(args){
+					try{
+						func.apply(null, args);
+					}catch(e){
+						// func 是业务完成回调，异常应像 XHR onreadystatechange 中的回调异常一样暴露出去，
+						// 但不能进入 fetch/read 的 Promise catch，否则会被误判为 SSE 网络失败并触发 abnormalFunc。
+						setTimeout(function(){
+							throw e;
+						}, 0);
+					}
+				};
+				var handleNormalResponse = function(response){
+					return response.text().then(function(responseText){
+						// 这里代表 translate.json 已经返回了完整普通响应，不再触发 fallback 重复请求。
+						// 后续若用户回调自身抛错，也应按已收到业务响应处理，而不是误判为 fetch 失败后再发 XHR。
+						hasEvent = true;
+						triggerResponse(responseText);
+
+						var json = null;
+						if(typeof(responseText) == 'undefined' || responseText == null){
+							// 与 XHR 旧逻辑保持一致：空响应不解析 JSON，直接把原始内容交给调用方。
+						}else{
+							if(responseText.indexOf('{') > -1 && responseText.indexOf('}') > -1){
+								try{
+									json = JSON.parse(responseText);
+								}catch(e){
+									translate.log(e);
+								}
+							}
+						}
+
+						if(json === null){
+							callResponseFunc([responseText]);
+						}else{
+							callResponseFunc([json, data, requestState]);
+						}
+					});
+				};
+
+				window.fetch(url, {
+					method:'POST',
+					headers:headers,
+					body:params
+				}).then(function(response){
+					requestState.status = response.status;
+					if(response.status != 200){
+						if(!hasEvent){
+							callFallback();
+							return null;
+						}
+						callAbnormal('HTTP response code : '+response.status+', url: '+url);
+						return null;
+					}
+					var contentType = '';
+					if(response.headers != null && typeof(response.headers.get) == 'function'){
+						contentType = response.headers.get('content-type') || '';
+					}
+					if(contentType.toLowerCase().indexOf('text/event-stream') < 0){
+						return handleNormalResponse(response);
+					}
+					if(typeof(response.body) == 'undefined' || response.body == null || typeof(response.body.getReader) != 'function'){
+						callFallback();
+						return null;
+					}
+
+					var reader = response.body.getReader();
+					var decoder = new window.TextDecoder('utf-8');
+					var buffer = '';
+					var handleBlock = function(block){
+						if(block == null || block.length < 1){
+							return;
+						}
+						var event = translate.request.sse.parseEventBlock(block);
+						if(event.dispatch !== true){
+							// 注释心跳、id、retry 等 SSE 控制块不代表服务端已经返回业务数据，
+							// 不能把 hasEvent 提前置为 true，否则后续断流时会阻断原 JSON 请求降级。
+							return;
+						}
+						hasEvent = true;
+						if(event.name == 'done'){
+							finished = true;
+							requestState.sseEventName = event.name;
+							triggerResponse(event.data);
+						}else if(event.name == 'error'){
+							finished = true;
+							requestState.sseEventName = event.name;
+							triggerResponse(event.data);
+						}
+						translate.request.sse.triggerEvent(event.name, event.data, data, sseCallbacks);
+						if(event.name == 'done'){
+							callResponseFunc([event.data, data, requestState]);
+						}else if(event.name == 'error'){
+							callResponseFunc([event.data, data, requestState]);
+						}
+					};
+					var read = function(){
+						return reader.read().then(function(result){
+							if(result.done){
+								buffer = buffer + decoder.decode();
+								buffer = buffer.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+								if(buffer.length > 0){
+									handleBlock(buffer);
+									buffer = '';
+								}
+								if(!finished){
+									if(!hasEvent){
+										callFallback();
+									}else{
+										callAbnormal('SSE connection finished before done event. url: '+url);
+									}
+								}
+								return;
+							}
+							buffer = buffer + decoder.decode(result.value, {stream:true});
+							buffer = buffer.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+							var splitIndex = buffer.indexOf('\n\n');
+							while(splitIndex > -1){
+								var block = buffer.substring(0, splitIndex);
+								buffer = buffer.substring(splitIndex+2);
+								handleBlock(block);
+								splitIndex = buffer.indexOf('\n\n');
+							}
+							return read();
+						});
+					};
+					return read();
+				}).catch(function(e){
+					if(!hasEvent){
+						callFallback();
+					}else{
+						callAbnormal('SSE request error: '+e.message+', url: '+url);
+					}
+				});
+				return true;
+			}
 		},
 		/*
 			v3.18.35.20250920 增加
@@ -9183,9 +10426,12 @@ var translate = {
 		},
 		/*
 			请求后端接口的响应。无论是否成功，都会触发此处。
-			另外当 xhr.readyState==4 的状态时才会触发。
+			普通 XHR 请求会在 xhr.readyState==4 的状态时触发。
+			如果 translate.json 启用了 SSE 并由 SSE 成功接管请求，这里会传入一个最小兼容响应对象，
+			它不是原生 XMLHttpRequest，但会保留 status、readyState、responseText、response、data、requestURL 等常用字段，
+			并通过 sse:true 标记来源，方便旧扩展代码兼容判断。
 			此处会在接口请求响应后、且在translate.js处理前就会触发
-			@param xhr XMLHttpRequest 接口请求
+			@param xhr XMLHttpRequest 接口请求；SSE 请求为最小兼容响应对象
 			
 		*/
 		response:function(xhr){
@@ -9463,6 +10709,99 @@ var translate = {
 			return url;
 		},
 		/**
+		 * 按 translate.request.send 原有规则组装 POST 表单参数。
+		 * <p>XHR 和 SSE 都必须通过这里生成参数，避免 stream=1 分支遗漏 browserDefaultLanguage、
+		 * appendParams 或企业版 key，导致同一个 translate.json 请求在两条传输路径上的行为不一致。</p>
+		 *
+		 * @param data 请求参数对象或字符串。传入对象时会按原逻辑追加公共参数。
+		 * @param extraParams 仅当前请求额外追加的参数，例如 SSE 请求的 stream=1。
+		 * @return application/x-www-form-urlencoded 格式的请求体
+		 */
+		buildPostParams:function(data, extraParams){
+			var params = '';
+
+			if(data == null || typeof(data) == 'undefined'){
+				data = {};
+			}
+
+			if(typeof(data) == 'string'){
+				params = data; //payload 方式 , edge 的方式
+			}else{
+				//表单提交方式
+
+				//加入浏览器默认语种  v3.6.1 增加，以便更好的进行自动切换语种
+				data.browserDefaultLanguage = translate.util.browserDefaultLanguage();
+
+				//追加附加参数
+				for(var apindex in translate.request.appendParams){
+					if (!translate.request.appendParams.hasOwnProperty(apindex)) {
+						continue;
+					}
+					data[apindex] = translate.request.appendParams[apindex];
+				}
+
+				if(typeof(translate.enterprise) != 'undefined'){
+					//加入key
+					if(typeof(translate.enterprise.key) != 'undefined' && typeof(translate.enterprise.key) == 'string' && translate.enterprise.key.length > 0){
+						data.key = translate.enterprise.key;
+					}
+				}
+
+				//只服务当前传输方式的临时参数放在最后追加，避免被 appendParams 覆盖。
+				if(typeof(extraParams) == 'object' && extraParams != null){
+					for(var epindex in extraParams){
+						if (!extraParams.hasOwnProperty(epindex)) {
+							continue;
+						}
+						data[epindex] = extraParams[epindex];
+					}
+				}
+
+				//组合参数
+				for(var index in data){
+					if (!data.hasOwnProperty(index)) {
+						continue;
+					}
+					if(params.length > 0){
+						params = params + '&';
+					}
+					params = params + index + '=' + data[index];
+				}
+			}
+			return params;
+		},
+		/**
+		 * 按 translate.request.send 原有规则组装请求头。
+		 * <p>这里返回普通对象，XHR 会逐个 setRequestHeader，fetch 会直接作为 headers 使用。</p>
+		 *
+		 * @param headers 当前请求自己的 header
+		 * @return 合并 appendHeaders 和 currentpage 后的 header 对象
+		 */
+		buildHeaders:function(headers){
+			var requestHeaders = {};
+			if(headers != null){
+				for(var index in headers){
+					if (!headers.hasOwnProperty(index)) {
+						continue;
+					}
+					requestHeaders[index] = headers[index];
+				}
+			}
+
+			//追加附加参数
+			for(var ahindex in translate.request.appendHeaders){
+				if (!translate.request.appendHeaders.hasOwnProperty(ahindex)) {
+					continue;
+				}
+				requestHeaders[ahindex] = translate.request.appendHeaders[ahindex];
+			}
+
+			if(translate.service.name != 'client.edge'){
+				requestHeaders.currentpage = window.location.href+'';
+			}
+			return requestHeaders;
+		},
+		/**
 		 * post请求
 		 * @param path 请求的path（path，传入的是translate.request.api.translate 这种的，需要使用 getUrl 来组合真正请求的url ）
 		 * @param data 请求的参数数据，传入如 
@@ -9478,8 +10817,9 @@ var translate = {
 		 * 					requestData post请求所携带的数据
 		 * 				注意，是响应数据是第一个参数，请求数据是第二个参数。 以向前兼容
 		 * @param abnormalFunc 响应异常所执行的方法，响应码不是200就会执行这个方法 ,传入如 function(xhr){}  另外这里的 xhr 会额外有个参数  xhr.requestURL 返回当前请求失败的url
+		 * @param sseCallbacks SSE 单次请求回调，只对当前请求生效，避免 translate.execute() 并发请求共享全局回调造成串线。
 		 */
-		post:function(path, data, func, abnormalFunc){
+		post:function(path, data, func, abnormalFunc, sseCallbacks){
 			var headers = {
 				'content-type':'application/x-www-form-urlencoded',
 			};
@@ -9513,6 +10853,25 @@ var translate = {
 			}
 			// ------- edge end --------
 
+			if(path == translate.request.api.translate && translate.request.sse.use === true && typeof(data) == 'object' && data != null){
+				var sseData = {};
+				for(var sseDataIndex in data){
+					if (!data.hasOwnProperty(sseDataIndex)) {
+						continue;
+					}
+					sseData[sseDataIndex] = data[sseDataIndex];
+				}
+				var selfRequest = this;
+				var sseStarted = translate.request.sse.post(path, sseData, func, abnormalFunc, function(){
+					// 只有在 SSE 还没有收到任何事件前失败，才降级回原始 JSON 请求。
+					// 这里继续使用原始 data，避免 stream=1 残留到降级请求里造成再次进入 SSE 入口。
+					selfRequest.send(path, data, data, func, 'post', true, headers, abnormalFunc, true);
+				}, sseCallbacks);
+				if(sseStarted){
+					return;
+				}
+			}
+
 			this.send(path, data, data, func, 'post', true, headers, abnormalFunc, true);
 		},
 		/**
@@ -9532,46 +10891,7 @@ var translate = {
 		 */
 		send:function(url, data, appendXhrData, func, method, isAsynchronize, headers, abnormalFunc, showErrorLog){
 			//post提交的参数
-			var params = '';
-
-			if(data == null || typeof(data) == 'undefined'){
-				data = {};
-			}
-			
-			if(typeof(data) == 'string'){
-				params = data; //payload 方式 , edge 的方式
-			}else{
-				//表单提交方式
-				
-				//加入浏览器默认语种  v3.6.1 增加，以便更好的进行自动切换语种
-				data.browserDefaultLanguage = translate.util.browserDefaultLanguage();
-				
-				//追加附加参数
-				for(var apindex in translate.request.appendParams){
-					if (!translate.request.appendParams.hasOwnProperty(apindex)) {
-			    		continue;
-			    	}
-					data[apindex] = translate.request.appendParams[apindex];
-				}
-
-				if(typeof(translate.enterprise) != 'undefined'){
-					//加入key
-					if(typeof(translate.enterprise.key) != 'undefined' && typeof(translate.enterprise.key) == 'string' && translate.enterprise.key.length > 0){
-						data.key = translate.enterprise.key;
-					}
-				}
-				
-				//组合参数
-				for(var index in data){
-					if (!data.hasOwnProperty(index)) {
-			    		continue;
-			    	}
-					if(params.length > 0){
-						params = params + '&';
-					}
-					params = params + index + '=' + data[index];
-				}
-			}
+			var params = translate.request.buildPostParams(data);
 			if(url.indexOf('https://') == 0 || url.indexOf('http://') == 0){
 				//采用的url绝对路径
 			}else{
@@ -9589,25 +10909,12 @@ var translate = {
 			//2.调用open方法（true----异步）
 			xhr.open(method,url,isAsynchronize);
 			//设置headers
-			if(headers != null){
-				for(var index in headers){
-					if (!headers.hasOwnProperty(index)) {
-			    		continue;
-			    	}
-					xhr.setRequestHeader(index,headers[index]);
-				}
-			}
-
-			//追加附加参数
-			for(var ahindex in translate.request.appendHeaders){
-				if (!translate.request.appendHeaders.hasOwnProperty(ahindex)) {
+			var requestHeaders = translate.request.buildHeaders(headers);
+			for(var headerIndex in requestHeaders){
+				if (!requestHeaders.hasOwnProperty(headerIndex)) {
 		    		continue;
 		    	}
-				xhr.setRequestHeader(ahindex,translate.request.appendHeaders[ahindex]);
-			}
-
-			if(translate.service.name != 'client.edge'){
-				xhr.setRequestHeader('currentpage', window.location.href+'');
+				xhr.setRequestHeader(headerIndex,requestHeaders[headerIndex]);
 			}
 			xhr.send(params);
 			//4.请求状态改变事件
@@ -9847,6 +11154,9 @@ var translate = {
 			isStart:false,
 			//用户的代码里是否启用了 translate.request.listener.start() ，true：启用
 			use:false, 
+			// request listener 启动后创建的资源，保存引用便于 reset() 释放。
+			intervalId:null,
+			observer:null,
 			minIntervalTime:800, // 两次触发的最小间隔时间，单位是毫秒，这里默认是800毫秒。最小填写时间为 200毫秒
 			lasttime:0,// 最后一次触发执行 translate.execute() 的时间，进行执行的那一刻，而不是执行完。13位时间戳
 			/*
@@ -9911,6 +11221,19 @@ var translate = {
 			start:function(){
 				translate.request.listener.use = true;
 			},
+
+			reset:function(){
+				if(translate.request.listener.intervalId !== null){
+					clearInterval(translate.request.listener.intervalId);
+					translate.request.listener.intervalId = null;
+				}
+				if(translate.request.listener.observer !== null){
+					translate.request.listener.observer.disconnect();
+					translate.request.listener.observer = null;
+				}
+				translate.request.listener.isStart = false;
+				translate.request.listener.executetime = 0;
+			},
 			/*js translate.request.listener.start end*/
 
 			// 当 translate.execute() 触发时，也就是触发了生命周期的 start 时，才会启动这里。这里要在翻译进行后才能触发，不然提前出发会导致跟用户设置的启动时间不相符造成异常
@@ -9928,7 +11251,7 @@ var translate = {
 				}
 
 				//增加一个没100毫秒检查一次执行任务的线程
-				setInterval(function(){
+				translate.request.listener.intervalId = setInterval(function(){
 					var currentTime = Date.now();
 					//console.log(translate.request.listener.executetime)
 					if(translate.request.listener.executetime > 1 && currentTime > translate.request.listener.executetime+translate.request.listener.delayExecuteTime){
@@ -9947,6 +11270,7 @@ var translate = {
 
 				if(typeof(PerformanceObserver) == 'undefined'){
 					translate.log('因浏览器版本较低， translate.request.listener.start() 中 PerformanceObserver 对象不存在，浏览器不支持，所以 translate.request.listener.start() 未生效。');
+					translate.request.listener.reset();
 					return;
 				}
 
@@ -10000,6 +11324,7 @@ var translate = {
 				    	translate.request.listener.addExecute();
 				    }
 				});
+				translate.request.listener.observer = observer;
 
 				//v3.15.14.20250617 增加
 				// 优先使用 entryTypes  兼容 ES5 的写法
@@ -10030,6 +11355,7 @@ var translate = {
 					translate.log("使用 PerformanceObserver type");
 				} catch (e) {
 					translate.log("当前浏览器不支持 PerformanceObserver 的任何参数, translate.request.listener.start() 未启动");
+					translate.request.listener.reset();
 				}
 
 			}
@@ -10349,7 +11675,7 @@ var translate = {
 
 		/** 使用基于 translate.node 的还原 **/
 		for (let key of translate.node.data.keys()) {
-			if (!translate.node.get(key) == null) {
+			if (translate.node.get(key) == null) {
 	    		continue;
 	    	}
 			//for(var attr in translate.node.get(key)){
@@ -10464,6 +11790,12 @@ var translate = {
 			}, null);
 		},
 		start:function () {
+			// start() 是公开方法，可能被用户代码直接多次调用。
+			// 已启动时直接返回，避免重复创建 tooltip 节点以及重复绑定 document 事件。
+			if(translate.selectionTranslate.use === true){
+				return;
+			}
+
 			translate.selectionTranslate.use = true;
 
 			//新建一个tooltip元素节点用于显示翻译
@@ -10636,6 +11968,24 @@ var translate = {
 				}
 				node.className = node.className.replace(/translate_api_in_progress/g, '');
 			},
+			// 移除指定元素上的翻译中 UI 提示。
+			// 这里保持原有 className 字符串替换方式，避免第一步抽公共能力时改变旧浏览器或特殊元素的行为。
+			removeUITipByElements:function(elements){
+				if(typeof(elements) == 'undefined' || elements == null){
+					return;
+				}
+				for(var r = 0; r<elements.length; r++){
+					if(typeof(elements[r]) == 'undefined' || elements[r] == null || typeof(elements[r].className) !== 'string'){
+						continue;
+					}
+					if(elements[r].className.indexOf('translatejs-text-element-hidden') > -1){
+						elements[r].className = elements[r].className.replace(/translatejs-text-element-hidden/g, '');
+					}
+					if(elements[r].className.indexOf('translate_api_in_progress') > -1){
+						elements[r].className = elements[r].className.replace(/translate_api_in_progress/g, '');
+					}
+				}
+			},
 			
 			/*
 				config: 可设置的一些参数
@@ -10646,6 +11996,11 @@ var translate = {
 				
 			*/
 			startUITip:function(config){
+				// 进度提示只需要启用一次，重复调用会重复注册生命周期回调。
+				if(translate.progress.api.use === true){
+					return;
+				}
+
 				translate.progress.api.use = true;
 
 				if(typeof(config) === 'undefined'){
@@ -10741,17 +12096,7 @@ var translate = {
 					translate.lifecycle.execute.translateNetworkAfter.push(function(data){
 						//取出当前变动的node，对应的元素
 						var elements = translate.element.nodeToElement(data.nodes);
-				    	
-				    	for(var r = 0; r<elements.length; r++){
-				    		if(typeof(elements[r].className) === 'string'){
-				    			if(elements[r].className.indexOf('translatejs-text-element-hidden') > -1){
-				    				elements[r].className = elements[r].className.replace(/translatejs-text-element-hidden/g, '');
-				    			}
-				    			if(elements[r].className.indexOf('translate_api_in_progress') > -1){
-									elements[r].className = elements[r].className.replace(/translate_api_in_progress/g, '');	
-								}
-				    		}
-				    	}
+						translate.progress.api.removeUITipByElements(elements);
 						
 						
 					});
@@ -11081,7 +12426,7 @@ var translate = {
 			}
 		*/
 		objToString:function(obj, formatSupplementaryCharLength){
-			if(typeof(obj) === 'object'){
+			if(obj != null && typeof(obj) === 'object'){
 				if(typeof(obj.jsObject) === 'object'){
 					//是 2025.10.10 以后的新版本
 				}else{
@@ -11204,7 +12549,7 @@ var translate = {
 			    const rule = translate.network.rules[i];
 			    
 			    // 检查 URL 是否匹配
-			    if(typeof(rule.url) == 'undefined' && rule.url == ''){
+			    if(typeof(rule.url) == 'undefined' || rule.url == ''){
 			    	translate.log('WARINNG : translate.network.rule find url is null:');
 			    	translate.log(rule);
 			    	continue;
@@ -11299,7 +12644,7 @@ var translate = {
 	        async handleGet(url, rule) {
 	        	//console.log(url);
 	        	//console.log(rule);
-	        	if(typeof(rule.params) == 'undefined' && typeof(rule.params.length) == 'undefined' && rule.params.length < 1){
+				if(!Array.isArray(rule.params) || rule.params.length < 1){
 	        		translate.log('WARINNG: rule not find params , rule : ');
 	        		translate.log(rule);
 	        		rule.params = [];
@@ -12253,6 +13598,11 @@ var translate = {
 			 	}
 		 */
 		webPageLoadTranslateBeforeHiddenText:function(config){
+			// 该能力只需要在页面加载阶段启用一次，重复调用会重复注册生命周期回调。
+			if(translate.visual.webPageLoadTranslateBeforeHiddenText_use === true){
+				return;
+			}
+
 			if(typeof(config) == 'undefined'){
 				config = {};
 			}
@@ -12411,8 +13761,10 @@ var translate = {
 				if(translate.time.execute.isUse){
 					//已经启动过了，不需要再启动了
 					translate.log('translate.time.execute.start() 已经启动过了，不需要再启动了');
+					return;
 				}
 
+				translate.time.execute.isUse = true;
 				translate.time.execute.data.isUse = true;
 
 				//翻译开始
@@ -12564,9 +13916,12 @@ var translate = {
 				如果触发此启用，那么会根据用户切换语言及设置，自动进行判定是否介入
 			*/
 			use:function(){
-				if(translate.faultTolerance.documentCreateTextNode.node == null){
-					translate.faultTolerance.documentCreateTextNode.node = new Map();
+				// use() 只需要注册一次生命周期回调，重复调用会导致同一套容错逻辑重复执行。
+				if(translate.faultTolerance.documentCreateTextNode.node != null){
+					return;
 				}
+				// 文本节点可能被页面动态移除，使用 WeakMap 避免缓存强引用导致节点无法释放。
+				translate.faultTolerance.documentCreateTextNode.node = new WeakMap();
 
 				//当用户点击切换语言时触发
 				translate.lifecycle.changeLanguage.push(function(to){

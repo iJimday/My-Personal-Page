@@ -47,4 +47,10 @@
 	<lastmod>2026-05-19</lastmod>
 	<changefreq>weekly</changefreq>
   </url>
+  <url>
+	<loc>https://8dao.net</loc>
+	<priority>0.3</priority>
+	<lastmod>2026-06-20</lastmod>
+	<changefreq>weekly</changefreq>
+  </url>
 </urlset>

@@ -17,6 +17,7 @@ translate.nomenclature.append('chinese_simplified', 'english', `
 	我的=My
 	菜 =Cai
 	小趴菜=Little Pacai
+	霸 =8dao
 	米 =Mish
 	米市=Domains Shop
 	小戴米市=JimDay's Domains Shop
@@ -35,7 +36,7 @@ translate.nomenclature.append('chinese_simplified', 'english', `
 	测 =IP
 	试 =Test
 	测试=test
-	4个 =4 Tools
+	5个 =5 Tools
 	众里寻他千百度。蓦然回首，那人却在，灯火阑珊处。=I look repeatedly for her in vain in the crowd, Suddenly looking back, I find her,In the dim lantern light.
 	天生我材必有用，千金散尽还复来。=Heaven has made us talents, we're not made in vain. A thousand gold coins spent, more will turn up again.
 `); //自定义翻译术语
